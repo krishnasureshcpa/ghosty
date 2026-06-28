@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] — 2026-06-28
+
+### Fixed
+
+- **Crash on every button click in Detail/Run screens** — replaced `asyncio.run()` with `await` inside Textual's async event loop; was raising `RuntimeError` on any action (F1)
+- **Apply button pushed empty RunScreen** — `action_apply_action` now constructs `RunScreen` with the selected action pre-loaded; was pushing a blank screen with no actions (A6)
+- **Hardcoded user-specific path in 4 files** — centralized cheatsheet resolution in `catalog.get_cheatsheet_path()` with `$PHANTOM_CHEATSHEET` env var and `~/.config/phantom/cheatsheet.md` fallback; was hardcoding `~/MasterBase/privacy/...` (S1)
+- **Silent failure on non-macOS** — added `sys.platform == "darwin"` guard at CLI entry; was attempting to run with confusing errors (S2)
+
+### Changed
+
+- `pyproject.toml`: pruned 6 dead dependencies (`sh`, `asciimatics`, `wcwidth`, `platformdirs`, `textual-plotext`, `textual-fspicker`) — declared but never imported (D1)
+- `src/phantom/screens/catalog.py`, `home.py`, `app.py`: dropped unused `Path` imports after path centralization
+
 ## [2.0.0] — 2026-06-27
 
 ### Added

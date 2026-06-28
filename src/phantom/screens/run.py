@@ -86,16 +86,16 @@ class RunScreen(Screen[None]):
     def _update_status(self, text: str) -> None:
         self.query_one("#run-status", Static).update(text)
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
         btn_id = event.button.id
         if btn_id == "btn-start":
-            self.action_start()
+            await self.action_start()
         elif btn_id == "btn-pause":
             self.notify("Pause/resume coming soon")
         elif btn_id == "btn-back":
             self.action_go_back()
 
-    def action_start(self) -> None:
+    async def action_start(self) -> None:
         if not hasattr(self, "_actions") or not self._actions:
             self.notify("No actions to run", severity="warning")
             return
@@ -113,7 +113,7 @@ class RunScreen(Screen[None]):
                     cell.elapsed = "done"
 
         runner = Runner(max_parallel=4, dry_run=False, progress_callback=on_progress)
-        results = asyncio.run(runner.run_actions(self._actions))
+        results = await runner.run_actions(self._actions)
 
         completed = sum(1 for r in results.values() if r.status == ExecStatus.COMPLETED)
         failed = sum(1 for r in results.values() if r.status == ExecStatus.FAILED)
@@ -124,7 +124,7 @@ class RunScreen(Screen[None]):
 
         # Record rollbacks
         rm = RollbackManager()
-        asyncio.run(self._record_rollbacks(rm, self._actions, results))
+        await self._record_rollbacks(rm, self._actions, results)
 
     async def _record_rollbacks(
         self, rm: RollbackManager, actions: list[Action], results: dict[str, ExecResult]

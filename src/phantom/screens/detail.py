@@ -10,7 +10,7 @@ from textual.screen import Screen
 from textual.widgets import Button, Static
 
 from phantom.catalog import Action
-from phantom.runner import Runner
+from phantom.runner import RollbackManager, Runner
 
 
 class DetailScreen(Screen[None]):
@@ -80,24 +80,22 @@ class DetailScreen(Screen[None]):
         )
         self.query_one("#detail-content", Static).update(content)
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
         btn_id = event.button.id
         if btn_id == "btn-apply":
             self.action_apply_action()
         elif btn_id == "btn-dry-run":
-            self.action_dry_run_action()
+            await self.action_dry_run_action()
         elif btn_id == "btn-undo":
-            self.action_undo_action()
+            await self.action_undo_action()
         elif btn_id == "btn-back":
             self.action_go_back()
 
-    def action_dry_run_action(self) -> None:
+    async def action_dry_run_action(self) -> None:
         if not self.action:
             return
-        import asyncio
-
         runner = Runner(max_parallel=1, dry_run=True)
-        result = asyncio.run(runner.run_action(self.action))
+        result = await runner.run_action(self.action)
         self.notify(
             f"[DRY RUN] {self.action.title}\n{result.stdout[:200]}",
             title="Dry Run Complete",
@@ -107,17 +105,17 @@ class DetailScreen(Screen[None]):
     def action_apply_action(self) -> None:
         if not self.action:
             return
-        self.app.push_screen("run")
+        from phantom.screens.run import RunScreen
 
-    def action_undo_action(self) -> None:
+        screen = RunScreen()
+        screen.run_actions([self.action])
+        self.app.push_screen(screen)
+
+    async def action_undo_action(self) -> None:
         if not self.action:
             return
-        import asyncio
-
-        from phantom.runner import RollbackManager
-
         rm = RollbackManager()
-        results = asyncio.run(rm.rollback_last(1))
+        results = await rm.rollback_last(1)
         if results:
             self.notify(f"Rolled back {results[0].action_id}", severity="information")
         else:

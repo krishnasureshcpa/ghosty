@@ -1,6 +1,6 @@
 [project]
 name = "phantom-cli"
-version = "2.0.0"
+version = "2.0.1"
 description = "Apple-grade macOS privacy & security TUI built on Textual"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -24,12 +24,6 @@ dependencies = [
     "rich>=13.9,<15",
     "click>=8.1,<9",
     "pydantic>=2.7,<3",
-    "sh>=2.0,<3",
-    "asciimatics>=1.15,<3",     # for animated splash
-    "wcwidth>=0.2,<1",          # unicode-aware widths
-    "platformdirs>=4.2,<5",     # ~/.config/phantom cross-platform paths
-    "textual-plotext>=1.0,<2",  # pandas-style charts inside Textual
-    "textual-fspicker>=0.4,<1", # native-feel file picker inside TUI
 ]
 
 [project.urls]

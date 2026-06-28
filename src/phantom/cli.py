@@ -32,13 +32,12 @@ if TYPE_CHECKING:
     from phantom.runner import ExecResult
 
 from phantom import __version__
-from phantom.catalog import parse_cheatsheet
+from phantom.catalog import get_cheatsheet_path, parse_cheatsheet
 from phantom.runner import RollbackManager, Runner
 
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-_CHEAT_SHEET = Path.home() / "MasterBase" / "privacy" / "MacOS-Privacy-CheatSheet.md"
 _CATALOG_JSON = Path.home() / ".config" / "phantom" / "catalog.json"
 
 
@@ -53,7 +52,7 @@ def _load_catalog() -> Catalog:
         from phantom.catalog import Catalog
 
         return Catalog.model_validate_json(_CATALOG_JSON.read_text())
-    catalog = parse_cheatsheet(_CHEAT_SHEET)
+    catalog = parse_cheatsheet(get_cheatsheet_path())
     _CATALOG_JSON.parent.mkdir(parents=True, exist_ok=True)
     _CATALOG_JSON.write_text(catalog.model_dump_json(indent=2))
     return catalog
@@ -86,8 +85,11 @@ def cli(ctx: click.Context, json_output: bool, show_version: bool) -> None:
         click.echo(f"phantom v{__version__}")
         ctx.exit()
 
+    if sys.platform != "darwin":
+        click.echo("Error: phantom requires macOS.", err=True)
+        sys.exit(1)
+
     if ctx.invoked_subcommand is None:
-        # Default: launch the TUI
         ctx.invoke(tui)
 
 

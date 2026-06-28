@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any, ClassVar
 
 from textual.app import ComposeResult
@@ -10,9 +9,7 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Label, ListItem, ListView, Static
 
-from phantom.catalog import Action, Catalog, Chapter, parse_cheatsheet
-
-_CHEAT_SHEET = Path.home() / "MasterBase" / "privacy" / "MacOS-Privacy-CheatSheet.md"
+from phantom.catalog import Action, Catalog, Chapter, get_cheatsheet_path, parse_cheatsheet
 
 
 class ActionListItem(ListItem):
@@ -63,7 +60,7 @@ class CatalogScreen(Screen[None]):
 
     def _load_catalog(self) -> Catalog:
         try:
-            return parse_cheatsheet(_CHEAT_SHEET)
+            return parse_cheatsheet(get_cheatsheet_path())
         except Exception:
             return Catalog()
 

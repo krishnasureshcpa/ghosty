@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any, ClassVar
 
 from textual.app import ComposeResult
@@ -11,9 +10,7 @@ from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Button, Static
 
-from phantom.catalog import Catalog, parse_cheatsheet
-
-_CHEAT_SHEET = Path.home() / "MasterBase" / "privacy" / "MacOS-Privacy-CheatSheet.md"
+from phantom.catalog import Catalog, get_cheatsheet_path, parse_cheatsheet
 
 
 class StatCard(Static):
@@ -76,7 +73,7 @@ class HomeScreen(Screen[None]):
 
     def _load_catalog(self) -> Catalog:
         try:
-            return parse_cheatsheet(_CHEAT_SHEET)
+            return parse_cheatsheet(get_cheatsheet_path())
         except Exception:
             return Catalog()
 

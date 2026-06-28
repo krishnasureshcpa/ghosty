@@ -9,6 +9,7 @@ Each chapter (## N · Title) yields multiple Actions, ranked by "paranoid level"
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 from datetime import UTC, datetime
 from enum import IntEnum, StrEnum
@@ -495,3 +496,16 @@ def _infer_tags(chapter_title: str, level_title: str) -> list[str]:
 
 def _needs_reboot(content: str) -> bool:
     return any(kw in content.lower() for kw in ("restart", "reboot", "login again", "relog"))
+
+
+# ---------------------------------------------------------------------------
+# Cheat-sheet path resolution
+# ---------------------------------------------------------------------------
+
+_DEFAULT_CHEATSHEET = Path.home() / "MasterBase" / "privacy" / "MacOS-Privacy-CheatSheet.md"
+
+
+def get_cheatsheet_path() -> Path:
+    """Resolve the cheat-sheet path, preferring PHANTOM_CHEATSHEET env var."""
+    env = os.environ.get("PHANTOM_CHEATSHEET")
+    return Path(env) if env else _DEFAULT_CHEATSHEET

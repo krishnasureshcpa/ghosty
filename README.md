@@ -1,6 +1,6 @@
 # Phantom — macOS Privacy & Security TUI
 
-> **Version 2 · Built from the ground up**
+> **v2.0.1 — Consumer-ready release**
 > Apple-grade privacy hardening, audit, and tool installation — driven from a single keyboard-first terminal app, across 20 chapters of curated hardening guidance.
 
 [![CI](https://github.com/krishnasureshcpa/ghosty/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnasureshcpa/ghosty/actions)
@@ -58,6 +58,8 @@ dry-run by default, and one-line rollback.
 - **🤖 Real installs** — `brew install` actually runs, the resulting binary path is verified, and (optional) launched.
 - **─JSON output** — `--json` flag for scripting & replay.
 - **♿ Free of anti-patterns** — handles `NO_COLOR`, `TERM=dumb`, broken pipes, ghost cursors, CJK widths.
+- **🔧 Overrideable cheatsheet path** — set `$PHANTOM_CHEATSHEET` to point the catalog at a custom privacy guide location; defaults to `~/.config/phantom/cheatsheet.md`.
+- **⛔ macOS-only guard** — CLI exits with a clear error on unsupported platforms.
 
 ---
 
@@ -120,7 +122,7 @@ Inside the TUI:
 - **Styles:** [Rich](https://rich.readthedocs.io) ≥ 13 (gradient, syntax, progress)
 - **CLI:** [Click](https://click.palletsprojects.com) ≥ 8.1
 - **Validation:** [Pydantic](https://pydantic.dev) v2
-- **Async shell:** `asyncio` + `sh` (no race conditions, no zombies)
+- **Async shell:** `asyncio` (no race conditions, no zombies)
 - **Resolver:** `uv` (10× faster than pip+venv)
 
 ---
@@ -151,7 +153,7 @@ that need it; everything else runs unprivileged.
 
 - [Textualize](https://textual.textualize.com) — for Textual, Rich, and the entire terminal-app renaissance.
 - [drduh/macOS-Security-and-Privacy-Guide](https://github.com/drduh/macOS-Security-and-Privacy-Guide) — the canonical source of all hardening guidance.
-- [Hexidine privacy cheatsheet](~/MasterBase/privacy/MacOS-Privacy-CheatSheet.md) — the working catalog mirror.
+- [Hexidine privacy cheatsheet](https://github.com/drduh/macOS-Security-and-Privacy-Guide) — the working catalog mirror (path overridable via `$PHANTOM_CHEATSHEET`).
 - [phmullins/awesome-macos-commandline](https://github.com/phmullins/awesome-macos-commandline) — for the curated tool index.
 
 ---

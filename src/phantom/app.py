@@ -7,7 +7,6 @@ global keybindings.
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any, ClassVar
 
 from textual.app import App, ComposeResult
@@ -84,4 +83,6 @@ class PhantomApp(App[None]):
 
 
 # Export theme constants for the app
-DEFAULT_CATALOG_PATH = Path.home() / "MasterBase" / "privacy" / "MacOS-Privacy-CheatSheet.md"
+from phantom.catalog import get_cheatsheet_path
+
+DEFAULT_CATALOG_PATH = get_cheatsheet_path()
