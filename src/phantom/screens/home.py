@@ -1,8 +1,9 @@
 """Home / dashboard screen — gradient banner, stats, quick actions."""
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -20,6 +21,11 @@ class StatCard(Static):
 
     value: reactive[str] = reactive("--")
     label: reactive[str] = reactive("")
+
+    def __init__(self, value: str = "--", label: str = "", **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.value = value
+        self.label = label
 
     def render(self) -> str:
         return f"\n[bold]{self.value}[/]\n[dim]{self.label}[/]"

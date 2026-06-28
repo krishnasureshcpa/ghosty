@@ -15,6 +15,7 @@ Usage:
     phantom undo firewall.stealth Undo specific action by ID
     phantom --json                Machine-readable output for all modes
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -22,8 +23,13 @@ import json
 import sys
 from datetime import UTC
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import click
+
+if TYPE_CHECKING:
+    from phantom.catalog import Action, Catalog
+    from phantom.runner import ExecResult
 
 from phantom import __version__
 from phantom.catalog import parse_cheatsheet
@@ -40,10 +46,12 @@ _CATALOG_JSON = Path.home() / ".config" / "phantom" / "catalog.json"
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _load_catalog():
+
+def _load_catalog() -> Catalog:
     """Parse or load cached catalog."""
     if _CATALOG_JSON.exists():
         from phantom.catalog import Catalog
+
         return Catalog.model_validate_json(_CATALOG_JSON.read_text())
     catalog = parse_cheatsheet(_CHEAT_SHEET)
     _CATALOG_JSON.parent.mkdir(parents=True, exist_ok=True)
@@ -51,7 +59,7 @@ def _load_catalog():
     return catalog
 
 
-def _output(data: dict, json_output: bool):
+def _output(data: dict[str, Any], json_output: bool) -> None:
     if json_output:
         click.echo(json.dumps(data, indent=2, default=str))
     else:
@@ -115,13 +123,17 @@ def doctor(json_output: bool) -> None:
 
     # Apple Silicon
     import platform
+
     checks["arch"] = platform.machine()
     checks["apple_silicon"] = platform.machine() == "arm64"
 
     # SIP status
     import subprocess
+
     try:
-        r = subprocess.run(["/usr/bin/csrutil", "status"], capture_output=True, text=True, timeout=5)
+        r = subprocess.run(
+            ["/usr/bin/csrutil", "status"], capture_output=True, text=True, timeout=5
+        )
         checks["sip"] = "enabled" in r.stdout.lower()
         checks["sip_detail"] = r.stdout.strip()
     except Exception as e:
@@ -129,7 +141,9 @@ def doctor(json_output: bool) -> None:
 
     # FileVault
     try:
-        r = subprocess.run(["/usr/bin/fdesetup", "status"], capture_output=True, text=True, timeout=5)
+        r = subprocess.run(
+            ["/usr/bin/fdesetup", "status"], capture_output=True, text=True, timeout=5
+        )
         checks["filevault"] = "on" in r.stdout.lower()
         checks["filevault_detail"] = r.stdout.strip()
     except Exception as e:
@@ -139,7 +153,9 @@ def doctor(json_output: bool) -> None:
     try:
         r = subprocess.run(
             ["/usr/libexec/ApplicationFirewall/socketfilterfw", "--getglobalstate"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         checks["firewall"] = "enabled" in r.stdout.lower()
     except Exception as e:
@@ -151,13 +167,14 @@ def doctor(json_output: bool) -> None:
 
     # sudo
     try:
-        r = subprocess.run(["sudo", "-n", "true"], capture_output=True, timeout=5)
+        r = subprocess.run(["sudo", "-n", "true"], capture_output=True, text=True, timeout=5)
         checks["sudo_nopass"] = r.returncode == 0
     except Exception:
         checks["sudo_nopass"] = False
 
     # Terminal capability
     from phantom.theme import detect_capability
+
     checks["color_capability"] = detect_capability().value
 
     if json_output:
@@ -165,12 +182,30 @@ def doctor(json_output: bool) -> None:
     else:
         click.secho("┌─ Phantom Doctor ───────────────────────────────┐", bold=True)
         click.secho(f"  Arch:            {checks['arch']}", fg="cyan")
-        click.secho(f"  Apple Silicon:   {'✓' if checks.get('apple_silicon') else '✗'}", fg="green" if checks.get('apple_silicon') else "red")
-        click.secho(f"  SIP:             {'✓ enabled' if checks.get('sip') else '✗ disabled'}", fg="green" if checks.get('sip') else "red")
-        click.secho(f"  FileVault:       {'✓ on' if checks.get('filevault') else '✗ off'}", fg="green" if checks.get('filevault') else "red")
-        click.secho(f"  Firewall:        {'✓ enabled' if checks.get('firewall') else '✗ disabled'}", fg="green" if checks.get('firewall') else "red")
-        click.secho(f"  Homebrew:        {'✓' if checks.get('brew_installed') else '✗'}", fg="green" if checks.get('brew_installed') else "red")
-        click.secho(f"  Sudo (noask):    {'✓' if checks.get('sudo_nopass') else '✗ (will prompt)'}", fg="green" if checks.get('sudo_nopass') else "amber")
+        click.secho(
+            f"  Apple Silicon:   {'✓' if checks.get('apple_silicon') else '✗'}",
+            fg="green" if checks.get("apple_silicon") else "red",
+        )
+        click.secho(
+            f"  SIP:             {'✓ enabled' if checks.get('sip') else '✗ disabled'}",
+            fg="green" if checks.get("sip") else "red",
+        )
+        click.secho(
+            f"  FileVault:       {'✓ on' if checks.get('filevault') else '✗ off'}",
+            fg="green" if checks.get("filevault") else "red",
+        )
+        click.secho(
+            f"  Firewall:        {'✓ enabled' if checks.get('firewall') else '✗ disabled'}",
+            fg="green" if checks.get("firewall") else "red",
+        )
+        click.secho(
+            f"  Homebrew:        {'✓' if checks.get('brew_installed') else '✗'}",
+            fg="green" if checks.get("brew_installed") else "red",
+        )
+        click.secho(
+            f"  Sudo (noask):    {'✓' if checks.get('sudo_nopass') else '✗ (will prompt)'}",
+            fg="green" if checks.get("sudo_nopass") else "amber",
+        )
         click.secho(f"  Terminal color:  {checks['color_capability']}", fg="cyan")
         click.secho("└──────────────────────────────────────────────────┘")
 
@@ -214,7 +249,9 @@ def harden(target: str, dry_run: bool, json_output: bool) -> None:
         asyncio.run(_record_rollbacks(rm, actions, results))
 
 
-async def _record_rollbacks(rm: RollbackManager, actions: list, results: dict) -> None:
+async def _record_rollbacks(
+    rm: RollbackManager, actions: list[Action], results: dict[str, ExecResult]
+) -> None:
     for action in actions:
         res = results.get(action.id)
         if res and res.status.value == "completed":
@@ -238,7 +275,7 @@ def snapshot_save(json_output: bool) -> None:
     import subprocess
     from datetime import datetime
 
-    snap: dict = {
+    snap: dict[str, Any] = {
         "timestamp": datetime.now(UTC).isoformat(),
     }
     # FileVault
@@ -251,7 +288,9 @@ def snapshot_save(json_output: bool) -> None:
     try:
         r = subprocess.run(
             ["/usr/libexec/ApplicationFirewall/socketfilterfw", "--getglobalstate"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         snap["firewall"] = r.stdout.strip()
     except Exception as e:
@@ -296,13 +335,22 @@ def rollback(count: int, json_output: bool) -> None:
     results = asyncio.run(rm.rollback_last(count))
 
     if json_output:
-        click.echo(json.dumps({
-            "rolled_back": count,
-            "results": [
-                {"action_id": r.action_id, "status": r.status.value, "exit_code": r.exit_code}
-                for r in results
-            ],
-        }, indent=2))
+        click.echo(
+            json.dumps(
+                {
+                    "rolled_back": count,
+                    "results": [
+                        {
+                            "action_id": r.action_id,
+                            "status": r.status.value,
+                            "exit_code": r.exit_code,
+                        }
+                        for r in results
+                    ],
+                },
+                indent=2,
+            )
+        )
     else:
         click.secho(f" Rolled back {count} action(s)", fg="cyan")
         for r in results:
@@ -350,7 +398,9 @@ def install(tool: str, json_output: bool) -> None:
     try:
         r = subprocess.run(
             ["/opt/homebrew/bin/brew", "install", tool],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True,
+            text=True,
+            timeout=120,
         )
         success = r.returncode == 0
         if json_output:
@@ -388,18 +438,23 @@ def undo(action_id: str, json_output: bool) -> None:
     results = asyncio.run(rm.rollback_last(len(matching)))
 
     if json_output:
-        click.echo(json.dumps({
-            "action_id": action_id,
-            "results": [
-                {"status": r.status.value, "exit_code": r.exit_code}
-                for r in results
-            ],
-        }, indent=2))
+        click.echo(
+            json.dumps(
+                {
+                    "action_id": action_id,
+                    "results": [
+                        {"status": r.status.value, "exit_code": r.exit_code} for r in results
+                    ],
+                },
+                indent=2,
+            )
+        )
 
 
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     cli()

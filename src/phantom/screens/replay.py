@@ -1,4 +1,5 @@
 """Replay / History screen — shows execution log and snapshot list."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -68,9 +69,11 @@ class ReplayScreen(Screen[None]):
             ts = entry.get("timestamp", "?")[:19]
             aid = entry.get("action_id", "?")
             ops = len(entry.get("ops_executed", []))
-            history_list.append(ListItem(
-                Label(f"[dim]{ts}[/]  [bold]{aid}[/]  [{ops} ops]"),
-            ))
+            history_list.append(
+                ListItem(
+                    Label(f"[dim]{ts}[/]  [bold]{aid}[/]  [{ops} ops]"),
+                )
+            )
 
     def _load_snapshots(self) -> None:
         snap_dir = Path.home() / ".config" / "phantom" / "snapshots"
@@ -89,9 +92,11 @@ class ReplayScreen(Screen[None]):
         for snap in snaps[:20]:
             ts = snap.stem.replace("snapshot_", "")
             size = snap.stat().st_size
-            snap_list.append(ListItem(
-                Label(f"[dim]{ts}[/]  ({size} bytes)"),
-            ))
+            snap_list.append(
+                ListItem(
+                    Label(f"[dim]{ts}[/]  ({size} bytes)"),
+                )
+            )
 
     def action_go_back(self) -> None:
         self.app.pop_screen()

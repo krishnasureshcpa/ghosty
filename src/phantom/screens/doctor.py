@@ -1,8 +1,10 @@
 """Doctor screen — system health check with live results."""
+
 from __future__ import annotations
 
 import subprocess
-from typing import ClassVar
+from collections.abc import Callable
+from typing import Any, ClassVar
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -20,10 +22,17 @@ class CheckRow(Static):
     status: reactive[str] = reactive("pending")
     detail: reactive[str] = reactive("")
 
+    def __init__(self, label: str = "", status: str = "pending", **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.label = label
+        self.status = status
+
     def render(self) -> str:
         icons = {"pending": "⏳", "pass": "✓", "fail": "✗", "warn": "⚠"}
         icon = icons.get(self.status, "?")
-        color = {"pending": "dim", "pass": "green", "fail": "red", "warn": "yellow"}.get(self.status, "dim")
+        color = {"pending": "dim", "pass": "green", "fail": "red", "warn": "yellow"}.get(
+            self.status, "dim"
+        )
         detail_str = f"  [dim]{self.detail}[/]" if self.detail else ""
         return f"  [{color}]{icon}  {self.label}{detail_str}[/]"
 
@@ -39,7 +48,9 @@ class DoctorScreen(Screen[None]):
     def compose(self) -> ComposeResult:
         with Vertical(id="doctor-root"):
             yield Static("[bold #22D3EE]🩺  Phantom Doctor[/]", id="doctor-title", classes="title")
-            yield Static("Press [bold]r[/] to run checks", id="doctor-status", classes="status-line")
+            yield Static(
+                "Press [bold]r[/] to run checks", id="doctor-status", classes="status-line"
+            )
 
             with Vertical(id="checks-grid", classes="grid"):
                 for check_id in ("arch", "sip", "filevault", "firewall", "brew", "sudo", "color"):
@@ -68,8 +79,12 @@ class DoctorScreen(Screen[None]):
     def _run_checks(self) -> None:
         import platform
 
-        checks = {
-            "arch": lambda: ("pass", platform.machine()) if platform.machine() == "arm64" else ("warn", platform.machine()),
+        checks: dict[str, Callable[[], tuple[str, str]]] = {
+            "arch": lambda: (
+                ("pass", platform.machine())
+                if platform.machine() == "arm64"
+                else ("warn", platform.machine())
+            ),
             "sip": self._check_sip,
             "filevault": self._check_filevault,
             "firewall": self._check_firewall,
@@ -91,34 +106,45 @@ class DoctorScreen(Screen[None]):
         self.query_one("#btn-run", Button).disabled = False
 
     @staticmethod
-    def _check_sip():
-        r = subprocess.run(["/usr/bin/csrutil", "status"], capture_output=True, text=True, timeout=5)
-        return ("pass", "enabled") if "enabled" in r.stdout.lower() else ("fail", r.stdout.strip())
-
-    @staticmethod
-    def _check_filevault():
-        r = subprocess.run(["/usr/bin/fdesetup", "status"], capture_output=True, text=True, timeout=5)
-        return ("pass", "on") if "on" in r.stdout.lower() else ("fail", r.stdout.strip())
-
-    @staticmethod
-    def _check_firewall():
+    def _check_sip() -> tuple[str, str]:
         r = subprocess.run(
-            ["/usr/libexec/ApplicationFirewall/socketfilterfw", "--getglobalstate"],
-            capture_output=True, text=True, timeout=5,
+            ["/usr/bin/csrutil", "status"], capture_output=True, text=True, timeout=5
         )
         return ("pass", "enabled") if "enabled" in r.stdout.lower() else ("fail", r.stdout.strip())
 
     @staticmethod
-    def _check_brew():
-        from pathlib import Path
-        brew = Path("/opt/homebrew/bin/brew")
-        return ("pass", brew) if brew.exists() else ("fail", "not found")
+    def _check_filevault() -> tuple[str, str]:
+        r = subprocess.run(
+            ["/usr/bin/fdesetup", "status"], capture_output=True, text=True, timeout=5
+        )
+        return ("pass", "on") if "on" in r.stdout.lower() else ("fail", r.stdout.strip())
 
     @staticmethod
-    def _check_sudo():
+    def _check_firewall() -> tuple[str, str]:
+        r = subprocess.run(
+            ["/usr/libexec/ApplicationFirewall/socketfilterfw", "--getglobalstate"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        return ("pass", "enabled") if "enabled" in r.stdout.lower() else ("fail", r.stdout.strip())
+
+    @staticmethod
+    def _check_brew() -> tuple[str, str]:
+        from pathlib import Path
+
+        brew = Path("/opt/homebrew/bin/brew")
+        return ("pass", str(brew)) if brew.exists() else ("fail", "not found")
+
+    @staticmethod
+    def _check_sudo() -> tuple[str, str]:
         try:
             r = subprocess.run(["sudo", "-n", "true"], capture_output=True, timeout=5)
-            return ("pass", "no password required") if r.returncode == 0 else ("warn", "will prompt for password")
+            return (
+                ("pass", "no password required")
+                if r.returncode == 0
+                else ("warn", "will prompt for password")
+            )
         except Exception:
             return ("warn", "will prompt for password")
 

@@ -1,8 +1,9 @@
 """Run screen — parallel progress grid showing action execution in real time."""
+
 from __future__ import annotations
 
 import asyncio
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -11,7 +12,7 @@ from textual.screen import Screen
 from textual.widgets import Button, Static
 
 from phantom.catalog import Action
-from phantom.runner import ExecStatus, RollbackManager, Runner
+from phantom.runner import ExecResult, ExecStatus, RollbackManager, Runner
 
 
 class ActionProgress(Static):
@@ -20,6 +21,11 @@ class ActionProgress(Static):
     action_id: reactive[str] = reactive("")
     status: reactive[str] = reactive("pending")
     elapsed: reactive[str] = reactive("--")
+
+    def __init__(self, action_id: str = "", status: str = "pending", **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.action_id = action_id
+        self.status = status
 
     def render(self) -> str:
         icons = {
@@ -120,7 +126,9 @@ class RunScreen(Screen[None]):
         rm = RollbackManager()
         asyncio.run(self._record_rollbacks(rm, self._actions, results))
 
-    async def _record_rollbacks(self, rm, actions, results):
+    async def _record_rollbacks(
+        self, rm: RollbackManager, actions: list[Action], results: dict[str, ExecResult]
+    ) -> None:
         for action in actions:
             res = results.get(action.id)
             if res and res.status == ExecStatus.COMPLETED:

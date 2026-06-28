@@ -3,6 +3,7 @@ Runner — parallel action execution with progress tracking, dry-run support,
 and automatic rollback. Uses asyncio for concurrent execution with
 semaphore-controlled parallelism.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -13,7 +14,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from phantom.catalog import Action, ActionType, Op, RiskLevel
 
@@ -33,6 +34,7 @@ class ExecStatus(Enum):
 @dataclass(slots=True)
 class ExecResult:
     """Result of executing a single action."""
+
     action_id: str
     status: ExecStatus
     started_at: float
@@ -76,12 +78,15 @@ class Runner:
         self._results = {}
         self._cancelled = False
         await self._run_action(action)
-        return self._results.get(action.id, ExecResult(
-            action_id=action.id,
-            status=ExecStatus.FAILED,
-            started_at=time.time(),
-            error="Action not found in results",
-        ))
+        return self._results.get(
+            action.id,
+            ExecResult(
+                action_id=action.id,
+                status=ExecStatus.FAILED,
+                started_at=time.time(),
+                error="Action not found in results",
+            ),
+        )
 
     async def _run_action(self, action: Action) -> None:
         """Execute a single action with verification and rollback support."""
@@ -138,6 +143,7 @@ class Runner:
         capture: bool = True,
     ) -> ExecResult:
         """Execute a single operation."""
+        assert self._semaphore is not None
         async with self._semaphore:
             if self._cancelled:
                 raise RuntimeError("Execution cancelled")
@@ -157,7 +163,9 @@ class Runner:
             except TimeoutError as e:
                 proc.kill()
                 await proc.wait()
-                raise RuntimeError(f"Command timed out after {op.timeout_s}s: {op.command_str()}") from e
+                raise RuntimeError(
+                    f"Command timed out after {op.timeout_s}s: {op.command_str()}"
+                ) from e
 
             stdout = stdout_bytes.decode() if stdout_bytes else ""
             stderr = stderr_bytes.decode() if stderr_bytes else ""
@@ -169,7 +177,9 @@ class Runner:
             result.exit_code = proc.returncode or 0
 
             if proc.returncode != 0 and proc.returncode is not None:
-                raise RuntimeError(f"Command failed (exit {proc.returncode}): {op.command_str()}\n{stderr}")
+                raise RuntimeError(
+                    f"Command failed (exit {proc.returncode}): {op.command_str()}\n{stderr}"
+                )
 
             return result
 
@@ -177,7 +187,7 @@ class Runner:
         """Cancel all running actions."""
         self._cancelled = True
 
-    def get_summary(self) -> dict:
+    def get_summary(self) -> dict[str, Any]:
         """Get execution summary."""
         completed = sum(1 for r in self._results.values() if r.status == ExecStatus.COMPLETED)
         failed = sum(1 for r in self._results.values() if r.status == ExecStatus.FAILED)
@@ -191,7 +201,7 @@ class Runner:
             "results": {k: self._result_to_dict(v) for k, v in self._results.items()},
         }
 
-    def _result_to_dict(self, r: ExecResult) -> dict:
+    def _result_to_dict(self, r: ExecResult) -> dict[str, Any]:
         return {
             "action_id": r.action_id,
             "status": r.status.value,
@@ -216,7 +226,9 @@ class RollbackManager:
         self.store_path = store_path or Path("~/.config/phantom/rollback.jsonl").expanduser()
         self.store_path.parent.mkdir(parents=True, exist_ok=True)
 
-    async def record_execution(self, action_id: str, ops_executed: list[Op], rollback_ops: list[Op]) -> None:
+    async def record_execution(
+        self, action_id: str, ops_executed: list[Op], rollback_ops: list[Op]
+    ) -> None:
         """Record an execution for potential rollback."""
         entry = {
             "action_id": action_id,
@@ -232,7 +244,7 @@ class RollbackManager:
         if not self.store_path.exists():
             return []
 
-        entries: list[dict] = []
+        entries: list[dict[str, Any]] = []
         with self.store_path.open() as f:
             for line in f:
                 if line.strip():
@@ -268,12 +280,12 @@ class RollbackManager:
 
         return results
 
-    def get_history(self) -> list[dict]:
+    def get_history(self) -> list[dict[str, Any]]:
         """Get full execution history."""
         if not self.store_path.exists():
             return []
 
-        entries: list[dict] = []
+        entries: list[dict[str, Any]] = []
         with self.store_path.open() as f:
             for line in f:
                 if line.strip():

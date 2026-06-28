@@ -21,6 +21,7 @@ Pairs are designed against both dark and light terminal backgrounds by
 running on a 24-bit channel mix tuned for AA contrast against `#FFFFFF`
 and `#000000`.
 """
+
 from __future__ import annotations
 
 import os
@@ -40,10 +41,10 @@ from rich.theme import Theme as RichTheme
 class Capability(StrEnum):
     """What this terminal can render."""
 
-    TRUECOLOR = "truecolor"   # 24-bit RGB
-    ENHANCED   = "256"        # 256-color palette
-    BASIC      = "16"         # ANSI 16 colors only
-    PLAIN      = "0"          # no color (NO_COLOR, dumb pipe, …)
+    TRUECOLOR = "truecolor"  # 24-bit RGB
+    ENHANCED = "256"  # 256-color palette
+    BASIC = "16"  # ANSI 16 colors only
+    PLAIN = "0"  # no color (NO_COLOR, dumb pipe, …)
 
 
 def detect_capability(console: Console | None = None) -> Capability:
@@ -115,30 +116,35 @@ class Palette:
             # Same hues as 256 palette indices → still a clean look, less pop
             return cls(
                 capability=cap,
-                violet="\x1b[38;5;99m",   # 99 ~ #5f5fff violet
-                cyan="\x1b[38;5;51m",     # 51 ~ #00ffff cyan
-                amber="\x1b[38;5;221m",   # 221 ~ #ffd75f warm
-                crimp="\x1b[38;5;204m",   # 204 ~ #ff5f87 coral
-                slate="\x1b[38;5;245m",   # 245 ~ #8a8a8a
+                violet="\x1b[38;5;99m",  # 99 ~ #5f5fff violet
+                cyan="\x1b[38;5;51m",  # 51 ~ #00ffff cyan
+                amber="\x1b[38;5;221m",  # 221 ~ #ffd75f warm
+                crimp="\x1b[38;5;204m",  # 204 ~ #ff5f87 coral
+                slate="\x1b[38;5;245m",  # 245 ~ #8a8a8a
                 obsidian="\x1b[48;5;236m",  # panel fill
                 bone="\x1b[38;5;255m",
             )
         if cap is Capability.BASIC:
             return cls(
                 capability=cap,
-                violet="\x1b[35m",        # magenta
-                cyan="\x1b[36m",          # cyan
-                amber="\x1b[33m",         # yellow
-                crimp="\x1b[31m",         # red
-                slate="\x1b[37m",         # white
-                obsidian="",              # no fills in 16-color
+                violet="\x1b[35m",  # magenta
+                cyan="\x1b[36m",  # cyan
+                amber="\x1b[33m",  # yellow
+                crimp="\x1b[31m",  # red
+                slate="\x1b[37m",  # white
+                obsidian="",  # no fills in 16-color
                 bone="\x1b[37m",
             )
         # PLAIN
         return cls(
             capability=cap,
-            violet="", cyan="", amber="", crimp="",
-            slate="", obsidian="", bone="",
+            violet="",
+            cyan="",
+            amber="",
+            crimp="",
+            slate="",
+            obsidian="",
+            bone="",
         )
 
 
@@ -154,24 +160,24 @@ def pick_palette(console: Console | None = None) -> Palette:
 def rich_theme(p: Palette) -> RichTheme:
     """Build a Rich Theme mapping semantic names to our palette."""
     styled = {
-        "phantom.violet":   Color.parse(p.violet) if p.violet else "default",
-        "phantom.cyan":     Color.parse(p.cyan)   if p.cyan   else "default",
-        "phantom.amber":    Color.parse(p.amber)  if p.amber  else "default",
-        "phantom.crimp":    Color.parse(p.crimp)  if p.crimp  else "default",
-        "phantom.slate":    Color.parse(p.slate)  if p.slate  else "default",
-        "phantom.bone":     Color.parse(p.bone)   if p.bone   else "default",
+        "phantom.violet": Color.parse(p.violet) if p.violet else "default",
+        "phantom.cyan": Color.parse(p.cyan) if p.cyan else "default",
+        "phantom.amber": Color.parse(p.amber) if p.amber else "default",
+        "phantom.crimp": Color.parse(p.crimp) if p.crimp else "default",
+        "phantom.slate": Color.parse(p.slate) if p.slate else "default",
+        "phantom.bone": Color.parse(p.bone) if p.bone else "default",
         # Semantic aliases
-        "title":       "phantom.violet",
-        "subtitle":    "phantom.cyan",
-        "info":        "phantom.cyan",
-        "success":     "phantom.cyan",
-        "warning":     "phantom.amber",
-        "danger":      "phantom.crimp",
-        "muted":       "phantom.slate",
-        "key":         "phantom.amber bold",
-        "badge":       "phantom.violet on #1A1F2E",
+        "title": "phantom.violet",
+        "subtitle": "phantom.cyan",
+        "info": "phantom.cyan",
+        "success": "phantom.cyan",
+        "warning": "phantom.amber",
+        "danger": "phantom.crimp",
+        "muted": "phantom.slate",
+        "key": "phantom.amber bold",
+        "badge": "phantom.violet on #1A1F2E",
     }
-    return RichTheme(styled)
+    return RichTheme(styled)  # type: ignore[arg-type]  # ponytail: dict[str, Color|str] is valid at runtime
 
 
 def make_console(*, force_color: bool = False) -> Console:

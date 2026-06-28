@@ -5,6 +5,7 @@ into a typed, reversible action graph.
 Each chapter (## N · Title) yields multiple Actions, ranked by "paranoid level"
 3/2/1 where 3 = read-only/audit, 2 = safe mutate, 1 = destructive/high-impact.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -18,22 +19,25 @@ from pydantic import BaseModel, Field, field_validator
 
 class RiskLevel(IntEnum):
     """Paranoid level from the cheat sheet — 3 = audit, 2 = safe, 1 = destructive."""
-    AUDIT = 3      # read-only, zero risk (e.g., `fdesetup status`)
-    SAFE = 2       # idempotent, easily reversible (e.g., `defaults write …`)
+
+    AUDIT = 3  # read-only, zero risk (e.g., `fdesetup status`)
+    SAFE = 2  # idempotent, easily reversible (e.g., `defaults write …`)
     DESTRUCTIVE = 1  # needs sudo, may break things (e.g., `pfctl -e`)
 
 
 class ActionType(StrEnum):
     """What kind of operation this action performs."""
-    READ = "read"           # query current state
-    MUTATE = "mutate"       # change system state
-    VERIFY = "verify"       # post-condition check
-    INSTALL = "install"     # brew / curl / dmg install
-    ROLLBACK = "rollback"   # inverse of mutate
+
+    READ = "read"  # query current state
+    MUTATE = "mutate"  # change system state
+    VERIFY = "verify"  # post-condition check
+    INSTALL = "install"  # brew / curl / dmg install
+    ROLLBACK = "rollback"  # inverse of mutate
 
 
 class Op(BaseModel):
     """A single shell operation with metadata for the runner."""
+
     shell: str
     args: tuple[str, ...] = ()
     capture: bool = True
@@ -48,6 +52,7 @@ class Op(BaseModel):
 
 class Action(BaseModel):
     """An atomic, reversible hardening action."""
+
     id: str = Field(pattern=r"^[a-z0-9.]+$")  # e.g., "firewall.stealth"
     chapter: str
     chapter_num: int
@@ -72,6 +77,7 @@ class Action(BaseModel):
 
 class Chapter(BaseModel):
     """A cheat-sheet chapter containing multiple actions."""
+
     number: int
     title: str
     summary: str
@@ -80,6 +86,7 @@ class Chapter(BaseModel):
 
 class Catalog(BaseModel):
     """Complete parsed catalog — serializable to JSON for the TUI."""
+
     chapters: list[Chapter] = Field(default_factory=list)
     source_hash: str = ""
     generated_at: str = ""
@@ -154,7 +161,11 @@ def parse_cheatsheet(path: Path) -> Catalog:
         body = parts[i + 2] if i + 2 < len(parts) else ""
 
         actions = _parse_chapter_body(num, title, body)
-        chapters.append(Chapter(number=num, title=title, summary=_first_sentence(body) or title, actions=actions))
+        chapters.append(
+            Chapter(
+                number=num, title=title, summary=_first_sentence(body) or title, actions=actions
+            )
+        )
 
     # Add Quick-Start as pseudo-chapter 21
     quick_start_body = _extract_section(text, "## Quick-Start")
@@ -163,7 +174,14 @@ def parse_cheatsheet(path: Path) -> Catalog:
         # If no actions found (no **N · headers), manually create the 4 quick-start actions
         if not qs_actions:
             qs_actions = _create_quick_start_actions()
-        chapters.append(Chapter(number=21, title="Quick-Start", summary="Four essential commands", actions=qs_actions))
+        chapters.append(
+            Chapter(
+                number=21,
+                title="Quick-Start",
+                summary="Four essential commands",
+                actions=qs_actions,
+            )
+        )
 
     return Catalog(
         chapters=chapters,
@@ -184,16 +202,44 @@ def _create_quick_start_actions() -> list[Action]:
             type=ActionType.MUTATE,
             description="Enable the Application Layer Firewall with stealth mode",
             ops=[
-                Op(shell="/usr/libexec/ApplicationFirewall/socketfilterfw", args=("--setglobalstate", "on"), requires_sudo=True, description="Enable firewall"),
-                Op(shell="/usr/libexec/ApplicationFirewall/socketfilterfw", args=("--setstealthmode", "on"), requires_sudo=True, description="Enable stealth mode"),
-                Op(shell="pkill", args=("-HUP", "socketfilterfw"), requires_sudo=True, description="Restart firewall"),
+                Op(
+                    shell="/usr/libexec/ApplicationFirewall/socketfilterfw",
+                    args=("--setglobalstate", "on"),
+                    requires_sudo=True,
+                    description="Enable firewall",
+                ),
+                Op(
+                    shell="/usr/libexec/ApplicationFirewall/socketfilterfw",
+                    args=("--setstealthmode", "on"),
+                    requires_sudo=True,
+                    description="Enable stealth mode",
+                ),
+                Op(
+                    shell="pkill",
+                    args=("-HUP", "socketfilterfw"),
+                    requires_sudo=True,
+                    description="Restart firewall",
+                ),
             ],
             verify_ops=[
-                Op(shell="/usr/libexec/ApplicationFirewall/socketfilterfw", args=("--getglobalstate",), description="Verify firewall is on"),
-                Op(shell="/usr/libexec/ApplicationFirewall/socketfilterfw", args=("--getstealthmode",), description="Verify stealth mode is on"),
+                Op(
+                    shell="/usr/libexec/ApplicationFirewall/socketfilterfw",
+                    args=("--getglobalstate",),
+                    description="Verify firewall is on",
+                ),
+                Op(
+                    shell="/usr/libexec/ApplicationFirewall/socketfilterfw",
+                    args=("--getstealthmode",),
+                    description="Verify stealth mode is on",
+                ),
             ],
             rollback_ops=[
-                Op(shell="/usr/libexec/ApplicationFirewall/socketfilterfw", args=("--setglobalstate", "off"), requires_sudo=True, description="Disable firewall"),
+                Op(
+                    shell="/usr/libexec/ApplicationFirewall/socketfilterfw",
+                    args=("--setglobalstate", "off"),
+                    requires_sudo=True,
+                    description="Disable firewall",
+                ),
             ],
             tags=["firewall", "quickstart"],
         ),
@@ -206,7 +252,12 @@ def _create_quick_start_actions() -> list[Action]:
             type=ActionType.MUTATE,
             description="Enable full-disk encryption via FileVault",
             ops=[
-                Op(shell="fdesetup", args=("enable",), requires_sudo=True, description="Enable FileVault"),
+                Op(
+                    shell="fdesetup",
+                    args=("enable",),
+                    requires_sudo=True,
+                    description="Enable FileVault",
+                ),
             ],
             verify_ops=[
                 Op(shell="fdesetup", args=("status",), description="Verify FileVault is on"),
@@ -224,7 +275,11 @@ def _create_quick_start_actions() -> list[Action]:
             type=ActionType.INSTALL,
             description="Open Firefox add-on page for uBlock Origin",
             ops=[
-                Op(shell="open", args=("https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/",), description="Open uBlock Origin page"),
+                Op(
+                    shell="open",
+                    args=("https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/",),
+                    description="Open uBlock Origin page",
+                ),
             ],
             verify_ops=[],
             rollback_ops=[],
@@ -239,14 +294,33 @@ def _create_quick_start_actions() -> list[Action]:
             type=ActionType.MUTATE,
             description="Append StevenBlack blocklist to /etc/hosts",
             ops=[
-                Op(shell="curl", args=("-L", "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"), capture=True, description="Download blocklist"),
-                Op(shell="tee", args=("-a", "/etc/hosts"), requires_sudo=True, description="Append to hosts file"),
+                Op(
+                    shell="curl",
+                    args=("-L", "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"),
+                    capture=True,
+                    description="Download blocklist",
+                ),
+                Op(
+                    shell="tee",
+                    args=("-a", "/etc/hosts"),
+                    requires_sudo=True,
+                    description="Append to hosts file",
+                ),
             ],
             verify_ops=[
-                Op(shell="grep", args=("StevenBlack", "/etc/hosts"), description="Verify blocklist present"),
+                Op(
+                    shell="grep",
+                    args=("StevenBlack", "/etc/hosts"),
+                    description="Verify blocklist present",
+                ),
             ],
             rollback_ops=[
-                Op(shell="sed", args=("-i.bak", "/StevenBlack/d", "/etc/hosts"), requires_sudo=True, description="Remove StevenBlack entries"),
+                Op(
+                    shell="sed",
+                    args=("-i.bak", "/StevenBlack/d", "/etc/hosts"),
+                    requires_sudo=True,
+                    description="Remove StevenBlack entries",
+                ),
             ],
             tags=["dns", "hosts", "quickstart"],
         ),
@@ -270,23 +344,27 @@ def _parse_chapter_body(chapter_num: int, chapter_title: str, body: str) -> list
         action_id = f"{_slug(chapter_title)}.{_slug(level_title)}.{action_counter:02d}"
 
         ops = _extract_ops(content)
-        verify_ops = _extract_ops(_extract_section(content, "verify") or _extract_section(content, "Expected") or "")
+        verify_ops = _extract_ops(
+            _extract_section(content, "verify") or _extract_section(content, "Expected") or ""
+        )
         rollback_ops = _infer_rollback(ops)
 
-        actions.append(Action(
-            id=action_id,
-            chapter=f"{chapter_num} · {chapter_title}",
-            chapter_num=chapter_num,
-            title=level_title,
-            risk=risk,
-            type=_infer_type(ops),
-            description=_first_sentence(content) or level_title,
-            ops=ops,
-            verify_ops=verify_ops,
-            rollback_ops=rollback_ops,
-            tags=_infer_tags(chapter_title, level_title),
-            requires_reboot=_needs_reboot(content),
-        ))
+        actions.append(
+            Action(
+                id=action_id,
+                chapter=f"{chapter_num} · {chapter_title}",
+                chapter_num=chapter_num,
+                title=level_title,
+                risk=risk,
+                type=_infer_type(ops),
+                description=_first_sentence(content) or level_title,
+                ops=ops,
+                verify_ops=verify_ops,
+                rollback_ops=rollback_ops,
+                tags=_infer_tags(chapter_title, level_title),
+                requires_reboot=_needs_reboot(content),
+            )
+        )
 
     return actions
 
@@ -308,12 +386,14 @@ def _extract_ops(text: str) -> list[Op]:
             if requires_sudo and args:
                 shell = args[0]
                 args = args[1:]
-            ops.append(Op(
-                shell=shell,
-                args=args,
-                requires_sudo=requires_sudo,
-                description=line,
-            ))
+            ops.append(
+                Op(
+                    shell=shell,
+                    args=args,
+                    requires_sudo=requires_sudo,
+                    description=line,
+                )
+            )
     return ops
 
 
@@ -336,20 +416,38 @@ def _infer_rollback(ops: list[Op]) -> list[Op]:
                 idx = op.args.index("write")
                 domain = op.args[idx + 1]
                 key = op.args[idx + 2]
-                rollback.append(Op(shell="defaults", args=("delete", domain, key), description=f"Rollback: delete {domain} {key}"))
+                rollback.append(
+                    Op(
+                        shell="defaults",
+                        args=("delete", domain, key),
+                        description=f"Rollback: delete {domain} {key}",
+                    )
+                )
             except (ValueError, IndexError):
                 pass
         elif op.shell == "launchctl" and "disable" in op.args:
             try:
                 idx = op.args.index("disable")
                 service = op.args[idx + 1]
-                rollback.append(Op(shell="launchctl", args=("enable", service), description=f"Rollback: enable {service}"))
+                rollback.append(
+                    Op(
+                        shell="launchctl",
+                        args=("enable", service),
+                        description=f"Rollback: enable {service}",
+                    )
+                )
             except (ValueError, IndexError):
                 pass
         elif op.shell == "pfctl" and "-e" in op.args:
             rollback.append(Op(shell="pfctl", args=("-d",), description="Rollback: disable pf"))
         elif op.shell == "socketfilterfw" and "--setglobalstate" in op.args and "on" in op.args:
-            rollback.append(Op(shell="socketfilterfw", args=("--setglobalstate", "off"), description="Rollback: disable firewall"))
+            rollback.append(
+                Op(
+                    shell="socketfilterfw",
+                    args=("--setglobalstate", "off"),
+                    description="Rollback: disable firewall",
+                )
+            )
     return rollback
 
 

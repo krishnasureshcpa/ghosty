@@ -4,10 +4,11 @@ PhantomApp — the Textual application root.
 Routes between screens, applies the Phantom theme, and provides
 global keybindings.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -29,7 +30,7 @@ class PhantomApp(App[None]):
     SUB_TITLE = "macOS Privacy & Security"
     CSS_PATH = None  # inline styles via compose
 
-    SCREENS: ClassVar[dict[str, type[Screen]]] = {
+    SCREENS: ClassVar[dict[str, type[Screen[Any]]]] = {  # type: ignore[assignment]  # ponytail: Textual accepts dict at runtime
         "home": HomeScreen,
         "catalog": CatalogScreen,
         "detail": DetailScreen,
@@ -38,7 +39,7 @@ class PhantomApp(App[None]):
         "replay": ReplayScreen,
     }
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS: ClassVar[list[Binding]] = [  # type: ignore[assignment]  # ponytail: Textual accepts list[Binding]
         Binding("h", "push_screen('home')", "Home", show=False),
         Binding("c", "push_screen('catalog')", "Catalog", show=True),
         Binding("d", "push_screen('doctor')", "Doctor", show=True),
@@ -62,7 +63,7 @@ class PhantomApp(App[None]):
         from textual.widgets import Button, Label, Static
 
         class HelpOverlay(ModalScreen[None]):
-            BINDINGS: ClassVar[list[tuple[str, str]]] = [("escape", "dismiss(None)")]
+            BINDINGS: ClassVar[list[tuple[str, str]]] = [("escape", "dismiss(None)")]  # type: ignore[assignment]  # ponytail: Textual accepts tuple list
 
             def compose(self) -> ComposeResult:
                 with Vertical(classes="help-container"):

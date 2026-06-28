@@ -1,5 +1,8 @@
 """Progress grid — live execution status for multiple actions in parallel."""
+
 from __future__ import annotations
+
+from typing import Any
 
 from textual.containers import Grid
 from textual.reactive import reactive
@@ -14,6 +17,11 @@ class ActionProgressCell(Static):
     action_id: reactive[str] = reactive("")
     status: reactive[ExecStatus] = reactive(ExecStatus.PENDING)
     label: reactive[str] = reactive("")
+
+    def __init__(self, action_id: str = "", label: str = "", **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.action_id = action_id
+        self.label = label
 
     def render(self) -> str:
         icons = {

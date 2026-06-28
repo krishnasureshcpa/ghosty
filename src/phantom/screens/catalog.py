@@ -1,8 +1,9 @@
 """Catalog screen — sidebar chapters + action list + preview pane."""
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -17,7 +18,7 @@ _CHEAT_SHEET = Path.home() / "MasterBase" / "privacy" / "MacOS-Privacy-CheatShee
 class ActionListItem(ListItem):
     """A single action in the list."""
 
-    def __init__(self, action: Action, **kwargs):
+    def __init__(self, action: Action, **kwargs: Any) -> None:
         self.action = action
         risk_icon = {3: "🔍", 2: "⚙", 1: "⚠"}
         icon = risk_icon.get(action.risk.value, "•")
@@ -73,10 +74,12 @@ class CatalogScreen(Screen[None]):
             return
         for ch in self.catalog.chapters:
             count = len(ch.actions)
-            chapter_list.append(ListItem(
-                Label(f"{ch.number:02d}. {ch.title}"),
-                Label(f"[dim]{count} actions[/]", classes="badge"),
-            ))
+            chapter_list.append(
+                ListItem(
+                    Label(f"{ch.number:02d}. {ch.title}"),
+                    Label(f"[dim]{count} actions[/]", classes="badge"),
+                )
+            )
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Handle selection in chapter list or action list."""
@@ -113,7 +116,9 @@ class CatalogScreen(Screen[None]):
         if len(action.ops) > 5:
             ops_text += f"\n  [dim]… and {len(action.ops) - 5} more[/]"
         risk_label = {3: "🔍 Audit", 2: "⚙ Safe", 1: "⚠ Destructive"}
-        verify_text = "\n".join(f"  ✓ {op.command_str()}" for op in action.verify_ops[:3]) or "  [dim]none[/]"
+        verify_text = (
+            "\n".join(f"  ✓ {op.command_str()}" for op in action.verify_ops[:3]) or "  [dim]none[/]"
+        )
 
         preview.update(
             f"[bold]{action.title}[/]\n\n"

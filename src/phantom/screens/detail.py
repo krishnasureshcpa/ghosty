@@ -1,4 +1,5 @@
 """Detail screen — deep view of a single action with full ops/verify/rollback."""
+
 from __future__ import annotations
 
 from typing import ClassVar
@@ -40,19 +41,23 @@ class DetailScreen(Screen[None]):
         self.action = action
 
         risk_label = {3: "🔍 Audit", 2: "⚙ Safe", 1: "⚠ Destructive"}
-        ops_text = "\n".join(
-            f"[bold]  $ {op.command_str()}[/]" +
-            (" [dim](sudo)[/]" if op.requires_sudo else "")
-            for op in action.ops
-        ) or "  [dim]No commands[/]"
+        ops_text = (
+            "\n".join(
+                f"[bold]  $ {op.command_str()}[/]" + (" [dim](sudo)[/]" if op.requires_sudo else "")
+                for op in action.ops
+            )
+            or "  [dim]No commands[/]"
+        )
 
-        verify_text = "\n".join(
-            f"  ✓ {op.command_str()}" for op in action.verify_ops
-        ) or "  [dim]No verification[/]"
+        verify_text = (
+            "\n".join(f"  ✓ {op.command_str()}" for op in action.verify_ops)
+            or "  [dim]No verification[/]"
+        )
 
-        rollback_text = "\n".join(
-            f"  ↩ {op.command_str()}" for op in action.rollback_ops
-        ) or "  [dim]No automatic rollback[/]"
+        rollback_text = (
+            "\n".join(f"  ↩ {op.command_str()}" for op in action.rollback_ops)
+            or "  [dim]No automatic rollback[/]"
+        )
 
         tags = ", ".join(f"[dim]#{t}[/]" for t in action.tags) if action.tags else "[dim]none[/]"
 
@@ -90,6 +95,7 @@ class DetailScreen(Screen[None]):
         if not self.action:
             return
         import asyncio
+
         runner = Runner(max_parallel=1, dry_run=True)
         result = asyncio.run(runner.run_action(self.action))
         self.notify(
@@ -109,6 +115,7 @@ class DetailScreen(Screen[None]):
         import asyncio
 
         from phantom.runner import RollbackManager
+
         rm = RollbackManager()
         results = asyncio.run(rm.rollback_last(1))
         if results:
