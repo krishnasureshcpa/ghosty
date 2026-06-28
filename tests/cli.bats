@@ -1,44 +1,44 @@
 #!/usr/bin/env bats
-# Integration tests for phantom CLI.
-# Uses `python -m phantom.cli` because entry points need a packaged build.
+# Integration tests for ghosty CLI.
+# Uses `python -m ghosty.cli` because entry points need a packaged build.
 
-@test "phantom --help prints usage" {
-    run uv run python -m phantom.cli --help
+@test "ghosty --help prints usage" {
+    run uv run python -m ghosty.cli --help
     [ "$status" -eq 0 ]
     echo "$output" | grep -qi "usage"
 }
 
-@test "phantom doctor runs without error" {
-    run uv run python -m phantom.cli doctor
+@test "ghosty doctor runs without error" {
+    run uv run python -m ghosty.cli doctor
     [ "$status" -eq 0 ]
 }
 
-@test "phantom --version prints version" {
-    run uv run python -m phantom.cli --version
+@test "ghosty --version prints version" {
+    run uv run python -m ghosty.cli --version
     [ "$status" -eq 0 ]
-    echo "$output" | grep -qE "phantom"
+    echo "$output" | grep -qE "ghosty"
 }
 
-@test "phantom doctor --json produces valid JSON" {
-    run uv run python -m phantom.cli doctor --json
+@test "ghosty doctor --json produces valid JSON" {
+    run uv run python -m ghosty.cli doctor --json
     [ "$status" -eq 0 ]
     echo "$output" | python3 -c "import json,sys; json.loads(sys.stdin.read())"
 }
 
-@test "phantom snapshot save creates snapshot file" {
-    run uv run python -m phantom.cli snapshot save --json
+@test "ghosty snapshot save creates snapshot file" {
+    run uv run python -m ghosty.cli snapshot save --json
     [ "$status" -eq 0 ]
     echo "$output" | python3 -c "import json,sys; d=json.loads(sys.stdin.read())"
 }
 
-@test "phantom harden --help prints harden usage" {
-    run uv run python -m phantom.cli harden --help
+@test "ghosty harden --help prints harden usage" {
+    run uv run python -m ghosty.cli harden --help
     [ "$status" -eq 0 ]
     echo "$output" | grep -qi "hardening"
 }
 
-@test "phantom snapshot --help prints snapshot usage" {
-    run uv run python -m phantom.cli snapshot --help
+@test "ghosty snapshot --help prints snapshot usage" {
+    run uv run python -m ghosty.cli snapshot --help
     [ "$status" -eq 0 ]
     echo "$output" | grep -qi "snapshot"
 }

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] — 2026-06-28
+
+### Changed
+
+- **Project renamed `phantom` → `ghosty`** — source dir `src/phantom/` → `src/ghosty/`, all imports updated, pyproject.toml package name changed to `ghosty-cli`
+- **CLI entry points** — `phantom` removed; three new commands: `ghosty` (primary), `ghost` (alias), `gho` (shortest)
+- **Config paths** — `~/.config/phantom/` → `~/.config/ghosty/`
+- **Env var** — `$PHANTOM_CHEATSHEET` → `$GHOSTY_CHEATSHEET`
+- **README rewritten** — new ghost SVG logo (`logo/ghosty.svg`), SVG icons (Feather) replace emojis across all sections, install now shows HTTPS/SSH/gh CLI methods, usage table cleaned up
+- **Cheatsheet renamed** — `phantom-cheatsheet.md` → `ghosty-cheatsheet.md`, all internal refs updated
+
 ## [2.0.1] — 2026-06-28
 
 ### Fixed

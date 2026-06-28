@@ -10,7 +10,7 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Label, ListItem, ListView, Static
 
-from phantom.runner import RollbackManager
+from ghosty.runner import RollbackManager
 
 
 class ReplayScreen(Screen[None]):
@@ -76,7 +76,7 @@ class ReplayScreen(Screen[None]):
             )
 
     def _load_snapshots(self) -> None:
-        snap_dir = Path.home() / ".config" / "phantom" / "snapshots"
+        snap_dir = Path.home() / ".config" / "ghosty" / "snapshots"
         snap_list = self.query_one("#snapshot-list", ListView)
         snap_list.clear()
 

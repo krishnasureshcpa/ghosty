@@ -12,7 +12,7 @@ from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Button, Static
 
-from phantom.theme import detect_capability
+from ghosty.theme import detect_capability
 
 
 class CheckRow(Static):
@@ -47,7 +47,7 @@ class DoctorScreen(Screen[None]):
 
     def compose(self) -> ComposeResult:
         with Vertical(id="doctor-root"):
-            yield Static("[bold #22D3EE]🩺  Phantom Doctor[/]", id="doctor-title", classes="title")
+            yield Static("[bold #22D3EE]🩺  Ghosty Doctor[/]", id="doctor-title", classes="title")
             yield Static(
                 "Press [bold]r[/] to run checks", id="doctor-status", classes="status-line"
             )

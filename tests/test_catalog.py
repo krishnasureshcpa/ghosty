@@ -1,10 +1,10 @@
-"""Tests for phantom.catalog models — no TUI, no system calls, fast."""
+"""Tests for ghosty.catalog models — no TUI, no system calls, fast."""
 from __future__ import annotations
 
 import pytest
 from pydantic import ValidationError
 
-from phantom.catalog import Action, ActionType, Catalog, Chapter, Op, RiskLevel
+from ghosty.catalog import Action, ActionType, Catalog, Chapter, Op, RiskLevel
 
 
 class TestRiskLevel:

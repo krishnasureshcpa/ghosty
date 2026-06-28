@@ -1,19 +1,19 @@
 """
-Phantom CLI — Click entry point.
+Ghosty CLI — Click entry point.
 
 Usage:
-    phantom                       Launch the TUI
-    phantom doctor                System health check
-    phantom harden all            Non-interactive full hardening
-    phantom harden firewall       Single chapter
-    phantom snapshot save         Snapshot current state
-    phantom snapshot list         List snapshots
-    phantom rollback              Undo last action
-    phantom rollback 3            Undo last 3 actions
-    phantom replay                Show execution history
-    phantom install lulu          One-shot brew install + verify
-    phantom undo firewall.stealth Undo specific action by ID
-    phantom --json                Machine-readable output for all modes
+    ghosty                        Launch the TUI
+    ghosty doctor                 System health check
+    ghosty harden all             Non-interactive full hardening
+    ghosty harden firewall        Single chapter
+    ghosty snapshot save          Snapshot current state
+    ghosty snapshot list          List snapshots
+    ghosty rollback               Undo last action
+    ghosty rollback 3             Undo last 3 actions
+    ghosty replay                 Show execution history
+    ghosty install lulu           One-shot brew install + verify
+    ghosty undo firewall.stealth  Undo specific action by ID
+    ghosty --json                 Machine-readable output for all modes
 """
 
 from __future__ import annotations
@@ -28,17 +28,17 @@ from typing import TYPE_CHECKING, Any
 import click
 
 if TYPE_CHECKING:
-    from phantom.catalog import Action, Catalog
-    from phantom.runner import ExecResult
+    from ghosty.catalog import Action, Catalog
+    from ghosty.runner import ExecResult
 
-from phantom import __version__
-from phantom.catalog import get_cheatsheet_path, parse_cheatsheet
-from phantom.runner import RollbackManager, Runner
+from ghosty import __version__
+from ghosty.catalog import get_cheatsheet_path, parse_cheatsheet
+from ghosty.runner import RollbackManager, Runner
 
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-_CATALOG_JSON = Path.home() / ".config" / "phantom" / "catalog.json"
+_CATALOG_JSON = Path.home() / ".config" / "ghosty" / "catalog.json"
 
 
 # ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ _CATALOG_JSON = Path.home() / ".config" / "phantom" / "catalog.json"
 def _load_catalog() -> Catalog:
     """Parse or load cached catalog."""
     if _CATALOG_JSON.exists():
-        from phantom.catalog import Catalog
+        from ghosty.catalog import Catalog
 
         return Catalog.model_validate_json(_CATALOG_JSON.read_text())
     catalog = parse_cheatsheet(get_cheatsheet_path())
@@ -76,17 +76,17 @@ def _output(data: dict[str, Any], json_output: bool) -> None:
 @click.option("--version", "show_version", is_flag=True, help="Print version")
 @click.pass_context
 def cli(ctx: click.Context, json_output: bool, show_version: bool) -> None:
-    """Phantom — Apple-grade macOS privacy & security TUI.
+    """Ghosty — Apple-grade macOS privacy & security TUI.
 
     Browse 20+ chapters of curated hardening guidance and execute
     them from a single keyboard-first terminal app.
     """
     if show_version:
-        click.echo(f"phantom v{__version__}")
+        click.echo(f"ghosty v{__version__}")
         ctx.exit()
 
     if sys.platform != "darwin":
-        click.echo("Error: phantom requires macOS.", err=True)
+        click.echo("Error: ghosty requires macOS.", err=True)
         sys.exit(1)
 
     if ctx.invoked_subcommand is None:
@@ -100,15 +100,15 @@ def cli(ctx: click.Context, json_output: bool, show_version: bool) -> None:
 
 @cli.command(name="tui")
 def tui() -> None:
-    """Launch the Phantom TUI (default)."""
+    """Launch the Ghosty TUI (default)."""
     # Lazy import so Textual is only loaded when needed
     try:
-        from phantom.app import PhantomApp
+        from ghosty.app import GhostyApp
     except ImportError:
         click.secho("TUI not available — install with: uv sync", fg="red")
         sys.exit(1)
 
-    app = PhantomApp()
+    app = GhostyApp()
     app.run()
 
 
@@ -175,14 +175,14 @@ def doctor(json_output: bool) -> None:
         checks["sudo_nopass"] = False
 
     # Terminal capability
-    from phantom.theme import detect_capability
+    from ghosty.theme import detect_capability
 
     checks["color_capability"] = detect_capability().value
 
     if json_output:
         click.echo(json.dumps(checks, indent=2, default=str))
     else:
-        click.secho("┌─ Phantom Doctor ───────────────────────────────┐", bold=True)
+        click.secho("┌─ Ghosty Doctor ───────────────────────────────┐", bold=True)
         click.secho(f"  Arch:            {checks['arch']}", fg="cyan")
         click.secho(
             f"  Apple Silicon:   {'✓' if checks.get('apple_silicon') else '✗'}",
@@ -299,7 +299,7 @@ def snapshot_save(json_output: bool) -> None:
         snap["firewall"] = str(e)
 
     # Save
-    path = Path.home() / ".config" / "phantom" / "snapshots"
+    path = Path.home() / ".config" / "ghosty" / "snapshots"
     path.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     snap_file = path / f"snapshot_{ts}.json"
@@ -314,7 +314,7 @@ def snapshot_save(json_output: bool) -> None:
 @snapshot.command(name="list")
 def snapshot_list() -> None:
     """List all saved snapshots."""
-    snap_dir = Path.home() / ".config" / "phantom" / "snapshots"
+    snap_dir = Path.home() / ".config" / "ghosty" / "snapshots"
     if not snap_dir.exists():
         click.echo(" No snapshots found.")
         return

@@ -1,7 +1,7 @@
 """
-PhantomApp — the Textual application root.
+GhostyApp — the Textual application root.
 
-Routes between screens, applies the Phantom theme, and provides
+Routes between screens, applies the Ghosty theme, and provides
 global keybindings.
 """
 
@@ -14,18 +14,18 @@ from textual.binding import Binding
 from textual.screen import Screen
 from textual.widgets import Footer, Header
 
-from phantom.screens.catalog import CatalogScreen
-from phantom.screens.detail import DetailScreen
-from phantom.screens.doctor import DoctorScreen
-from phantom.screens.home import HomeScreen
-from phantom.screens.replay import ReplayScreen
-from phantom.screens.run import RunScreen
+from ghosty.screens.catalog import CatalogScreen
+from ghosty.screens.detail import DetailScreen
+from ghosty.screens.doctor import DoctorScreen
+from ghosty.screens.home import HomeScreen
+from ghosty.screens.replay import ReplayScreen
+from ghosty.screens.run import RunScreen
 
 
-class PhantomApp(App[None]):
+class GhostyApp(App[None]):
     """Apple-grade macOS privacy & security TUI."""
 
-    TITLE = "Phantom"
+    TITLE = "Ghosty"
     SUB_TITLE = "macOS Privacy & Security"
     CSS_PATH = None  # inline styles via compose
 
@@ -66,7 +66,7 @@ class PhantomApp(App[None]):
 
             def compose(self) -> ComposeResult:
                 with Vertical(classes="help-container"):
-                    yield Static("[bold]Phantom Help[/]", classes="help-title")
+                    yield Static("[bold]Ghosty Help[/]", classes="help-title")
                     yield Label("c  Catalog browser  |  d  Doctor  |  r  History")
                     yield Label("h  Home  |  q  Quit  |  ?  This help")
                     yield Label("↑/↓  Navigate  |  Enter  Select  |  Esc  Back")
@@ -83,6 +83,6 @@ class PhantomApp(App[None]):
 
 
 # Export theme constants for the app
-from phantom.catalog import get_cheatsheet_path
+from ghosty.catalog import get_cheatsheet_path
 
 DEFAULT_CATALOG_PATH = get_cheatsheet_path()

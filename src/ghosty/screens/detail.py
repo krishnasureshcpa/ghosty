@@ -9,8 +9,8 @@ from textual.containers import Horizontal, ScrollableContainer, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Static
 
-from phantom.catalog import Action
-from phantom.runner import RollbackManager, Runner
+from ghosty.catalog import Action
+from ghosty.runner import RollbackManager, Runner
 
 
 class DetailScreen(Screen[None]):
@@ -105,7 +105,7 @@ class DetailScreen(Screen[None]):
     def action_apply_action(self) -> None:
         if not self.action:
             return
-        from phantom.screens.run import RunScreen
+        from ghosty.screens.run import RunScreen
 
         screen = RunScreen()
         screen.run_actions([self.action])

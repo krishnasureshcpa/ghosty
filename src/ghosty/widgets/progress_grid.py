@@ -8,7 +8,7 @@ from textual.containers import Grid
 from textual.reactive import reactive
 from textual.widgets import Static
 
-from phantom.runner import ExecStatus
+from ghosty.runner import ExecStatus
 
 
 class ActionProgressCell(Static):

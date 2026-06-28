@@ -11,8 +11,8 @@ from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Button, Static
 
-from phantom.catalog import Action
-from phantom.runner import ExecResult, ExecStatus, RollbackManager, Runner
+from ghosty.catalog import Action
+from ghosty.runner import ExecResult, ExecStatus, RollbackManager, Runner
 
 
 class ActionProgress(Static):

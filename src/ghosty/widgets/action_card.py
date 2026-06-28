@@ -8,7 +8,7 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, Label, Static
 
-from phantom.catalog import Action
+from ghosty.catalog import Action
 
 
 class ActionCard(Vertical):

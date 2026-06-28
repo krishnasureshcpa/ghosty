@@ -1,6 +1,6 @@
 [project]
-name = "phantom-cli"
-version = "2.0.1"
+name = "ghosty-cli"
+version = "2.0.2"
 description = "Apple-grade macOS privacy & security TUI built on Textual"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -37,11 +37,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/phantom"]
+packages = ["src/ghosty"]
 
 [project.scripts]
-phantom = "phantom.cli:main"
-ghost  = "phantom.cli:main"   # legacy alias from v1
+ghosty = "ghosty.cli:main"
+ghost  = "ghosty.cli:main"    # shorter alias
+gho    = "ghosty.cli:main"    # shortest alias
 
 [project.optional-dependencies]
 dev = [
@@ -78,7 +79,7 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["src/phantom"]
+source = ["src/ghosty"]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:", "raise NotImplementedError"]

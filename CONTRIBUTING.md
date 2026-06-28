@@ -1,6 +1,6 @@
-# Contributing to Phantom
+# Contributing to Ghosty
 
-Thanks for your interest! Phantom is privacy-hardening tooling and we take
+Thanks for your interest! Ghosty is privacy-hardening tooling and we take
 quality seriously.
 
 ## Quick start
@@ -9,7 +9,7 @@ quality seriously.
 git clone https://github.com/krishnasureshcpa/ghosty
 cd ghosty
 uv sync
-uv run phantom
+uv run ghosty
 ```
 
 ## Making changes

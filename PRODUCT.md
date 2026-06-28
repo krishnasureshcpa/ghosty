@@ -10,7 +10,7 @@ macOS power users, privacy engineers, sysadmins, and Apple Silicon developers wh
 
 ## Product Purpose
 
-Phantom transforms the 919-line macOS Privacy & Security Guide into an interactive, keyboard-first TUI that lets users browse, select, execute, verify, and roll back hardening actions. Every action actually runs the shell — no stubs. Dry-run by default. Snapshots before mutations. One-line rollback.
+Ghosty transforms the 919-line macOS Privacy & Security Guide into an interactive, keyboard-first TUI that lets users browse, select, execute, verify, and roll back hardening actions. Every action actually runs the shell — no stubs. Dry-run by default. Snapshots before mutations. One-line rollback.
 
 ## Brand Personality
 

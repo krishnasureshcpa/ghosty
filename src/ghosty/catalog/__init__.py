@@ -506,6 +506,6 @@ _DEFAULT_CHEATSHEET = Path.home() / "MasterBase" / "privacy" / "MacOS-Privacy-Ch
 
 
 def get_cheatsheet_path() -> Path:
-    """Resolve the cheat-sheet path, preferring PHANTOM_CHEATSHEET env var."""
-    env = os.environ.get("PHANTOM_CHEATSHEET")
+    """Resolve the cheat-sheet path, preferring GHOSTY_CHEATSHEET env var."""
+    env = os.environ.get("GHOSTY_CHEATSHEET")
     return Path(env) if env else _DEFAULT_CHEATSHEET

@@ -16,10 +16,10 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from phantom.catalog import Action, ActionType, Op, RiskLevel
+from ghosty.catalog import Action, ActionType, Op, RiskLevel
 
 if TYPE_CHECKING:
-    from phantom.catalog import Action, Op
+    from ghosty.catalog import Action, Op
 
 
 class ExecStatus(Enum):
@@ -223,7 +223,7 @@ class RollbackManager:
     """Manages rollback operations for executed actions."""
 
     def __init__(self, store_path: Path | None = None):
-        self.store_path = store_path or Path("~/.config/phantom/rollback.jsonl").expanduser()
+        self.store_path = store_path or Path("~/.config/ghosty/rollback.jsonl").expanduser()
         self.store_path.parent.mkdir(parents=True, exist_ok=True)
 
     async def record_execution(

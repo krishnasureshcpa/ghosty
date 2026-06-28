@@ -10,7 +10,7 @@ from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Button, Static
 
-from phantom.catalog import Catalog, get_cheatsheet_path, parse_cheatsheet
+from ghosty.catalog import Catalog, get_cheatsheet_path, parse_cheatsheet
 
 
 class StatCard(Static):

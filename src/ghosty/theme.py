@@ -1,5 +1,5 @@
 """
-Phantom theme -- true-color-first palette with graceful 16/256-color fallback.
+Ghosty theme -- true-color-first palette with graceful 16/256-color fallback.
 
 Design rules (per the project's CLI design quality bar):
     1. NEVER rainbow-vomit — 4 semantic hues only.
@@ -9,7 +9,7 @@ Design rules (per the project's CLI design quality bar):
 
 Palette
 -------
-    Phantom violet  #7C5CFF   — primary, accent, banner gradient start
+    Ghosty violet  #7C5CFF   — primary, accent, banner gradient start
     Wraith cyan     #22D3EE   — success, banner gradient end
     Ember amber     #FFC857   — warning, attention
     Crimp red       #FF5C7C   — danger, destructive confirm
@@ -61,7 +61,7 @@ def detect_capability(console: Console | None = None) -> Capability:
         return Capability.PLAIN
 
     # Honor CLI override
-    if os.environ.get("PHANTOM_NO_COLOR") == "1":
+    if os.environ.get("GHOSTY_NO_COLOR") == "1":
         return Capability.PLAIN
 
     # Even dumb terminals get plain-mode treatment
@@ -160,29 +160,29 @@ def pick_palette(console: Console | None = None) -> Palette:
 def rich_theme(p: Palette) -> RichTheme:
     """Build a Rich Theme mapping semantic names to our palette."""
     styled = {
-        "phantom.violet": Color.parse(p.violet) if p.violet else "default",
-        "phantom.cyan": Color.parse(p.cyan) if p.cyan else "default",
-        "phantom.amber": Color.parse(p.amber) if p.amber else "default",
-        "phantom.crimp": Color.parse(p.crimp) if p.crimp else "default",
-        "phantom.slate": Color.parse(p.slate) if p.slate else "default",
-        "phantom.bone": Color.parse(p.bone) if p.bone else "default",
+        "ghosty.violet": Color.parse(p.violet) if p.violet else "default",
+        "ghosty.cyan": Color.parse(p.cyan) if p.cyan else "default",
+        "ghosty.amber": Color.parse(p.amber) if p.amber else "default",
+        "ghosty.crimp": Color.parse(p.crimp) if p.crimp else "default",
+        "ghosty.slate": Color.parse(p.slate) if p.slate else "default",
+        "ghosty.bone": Color.parse(p.bone) if p.bone else "default",
         # Semantic aliases
-        "title": "phantom.violet",
-        "subtitle": "phantom.cyan",
-        "info": "phantom.cyan",
-        "success": "phantom.cyan",
-        "warning": "phantom.amber",
-        "danger": "phantom.crimp",
-        "muted": "phantom.slate",
-        "key": "phantom.amber bold",
-        "badge": "phantom.violet on #1A1F2E",
+        "title": "ghosty.violet",
+        "subtitle": "ghosty.cyan",
+        "info": "ghosty.cyan",
+        "success": "ghosty.cyan",
+        "warning": "ghosty.amber",
+        "danger": "ghosty.crimp",
+        "muted": "ghosty.slate",
+        "key": "ghosty.amber bold",
+        "badge": "ghosty.violet on #1A1F2E",
     }
     return RichTheme(styled)  # type: ignore[arg-type]  # ponytail: dict[str, Color|str] is valid at runtime
 
 
 def make_console(*, force_color: bool = False) -> Console:
     """Single canonical Console — used by splash, doctor JSON, etc."""
-    force = force_color or os.environ.get("PHANTOM_COLOR") == "always"
+    force = force_color or os.environ.get("GHOSTY_COLOR") == "always"
     return Console(
         theme=rich_theme(pick_palette()),
         force_terminal=force,
