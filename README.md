@@ -3,13 +3,14 @@
 > **Version 2 · Built from the ground up**
 > Apple-grade privacy hardening, audit, and tool installation — driven from a single keyboard-first terminal app, across 20 chapters of curated hardening guidance.
 
-[![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue)](https://github.com/krishnasureshcpa/ghosty/actions)
-[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB)](https://www.python.org)
-[![Textual](https://img.shields.io/badge/TUI-Textual-7C5CFF)](https://textual.textualize.com)
-[![Rich](https://img.shields.io/badge/Rich-13%2B-22D3EE)](https://rich.readthedocs.io)
+[![CI](https://github.com/krishnasureshcpa/ghosty/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnasureshcpa/ghosty/actions)
+[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![Textual](https://img.shields.io/badge/TUI-Textual-7C5CFF?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkwyIDdMMTIgMTJMMjIgN0wxMiAyWiIgZmlsbD0iIzdDNUNGRiIvPjxwYXRoIGQ9Ik0yIDdMMTIgMTJMMjIgN1YxM0wxMiAxOEwyIDEzVjdaIiBmaWxsPSIjN0M1Q0ZGIi8+PC9zdmc+&label=TUI)](https://textual.textualize.com)
+[![Rich](https://img.shields.io/badge/Rich-13%2B-22D3EE?logo=python&logoColor=white)](https://rich.readthedocs.io)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![macOS](https://img.shields.io/badge/macOS-13%2B-black)](https://www.apple.com/macos)
-[![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-arm64-black)](https://support.apple.com/en-us/HT211814)
+[![macOS](https://img.shields.io/badge/macOS-13%2B-black?logo=apple&logoColor=white)](https://www.apple.com/macos)
+[![Stars](https://img.shields.io/github/stars/krishnasureshcpa/ghosty?style=flat&logo=github)](https://github.com/krishnasureshcpa/ghosty)
+[![Last Commit](https://img.shields.io/github/last-commit/krishnasureshcpa/ghosty?label=updated)](https://github.com/krishnasureshcpa/ghosty/commits/main)
 
 **Phantom** (CLI command: `phantom`) takes the 919-line **macOS Privacy & Security
 Guide**, transforms it into a typed, reversible action catalog, and wraps it in a
