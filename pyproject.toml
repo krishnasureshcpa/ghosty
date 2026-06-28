@@ -1,0 +1,83 @@
+[project]
+name = "phantom-cli"
+version = "2.0.0"
+description = "Apple-grade macOS privacy & security TUI built on Textual"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Krishna Suresh CPA", email = "krishnasureshcpa@users.noreply.github.com" }]
+keywords = ["macos", "privacy", "security", "tui", "textual", "rich", "apple-silicon", "hardening"]
+classifiers = [
+    "Environment :: Console :: Curses",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Security",
+    "Topic :: System :: Systems Administration",
+]
+
+dependencies = [
+    "textual>=0.85,<2",
+    "rich>=13.9,<15",
+    "click>=8.1,<9",
+    "pydantic>=2.7,<3",
+    "sh>=2.0,<3",
+    "asciimatics>=1.15,<3",     # for animated splash
+    "wcwidth>=0.2,<1",          # unicode-aware widths
+    "platformdirs>=4.2,<5",     # ~/.config/phantom cross-platform paths
+    "textual-plotext>=1.0,<2",  # pandas-style charts inside Textual
+    "textual-fspicker>=0.4,<1", # native-feel file picker inside TUI
+]
+
+[project.urls]
+"Homepage"        = "https://github.com/krishnasureshcpa/ghosty"
+"Bug Tracker"     = "https://github.com/krishnasureshcpa/ghosty/issues"
+"Source"          = "https://github.com/krishnasureshcpa/ghosty"
+"Cheat sheet"     = "https://github.com/drduh/macOS-Security-and-Privacy-Guide"
+
+[project.scripts]
+phantom = "phantom.cli:main"
+ghost  = "phantom.cli:main"   # legacy alias from v1
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "textual[dev]>=0.85",
+    "freezegun>=1.5",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["demo", "build", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "ASYNC", "RUF"]
+ignore = ["E501"]  # line length handled by formatter
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B011", "SIM117"]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+disallow_untyped_decorators = false
+
+[tool.pytest.ini_options]
+addopts = "-v --tb=short --strict-markers"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["src/phantom"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:", "raise NotImplementedError"]
