@@ -113,6 +113,122 @@ def tui() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Test — self-test & welcome
+# ---------------------------------------------------------------------------
+
+
+@cli.command()
+@click.option("--json", "json_output", is_flag=True)
+def test(json_output: bool) -> None:
+    """Run self-tests and display the Ghosty welcome screen."""
+    import platform
+    import sys
+    from pathlib import Path
+
+    if json_output:
+        click.echo(json.dumps({"status": "ok", "version": __version__}))
+        return
+
+    # ── Ghost logo ──────────────────────────────────────────────────
+    click.secho("", nl=False)
+    logo = (
+        "  "
+        "        ████████████████████████        \n"
+        "      ██                        ██      \n"
+        "     ██    ████    ░░    ████    ██     \n"
+        "     ██    ████    ██    ████    ██     \n"
+        "     ██                            ██     \n"
+        "     ██          ██████            ██     \n"
+        "     ██          ██████            ██     \n"
+        "     ██                            ██     \n"
+        "      ██      ██    ██          ██      \n"
+        "       ██   ███      ███       ██       \n"
+        "        ██ ██          ██     ██        \n"
+        "         ███            ██████          \n"
+        "          ██            ██              \n"
+        "           ██          ██               \n"
+        "            ████████████                \n"
+    )
+    click.secho(logo, fg="magenta")
+    click.secho(
+        "     👻  Ghosty  v" + __version__ + "  —  macOS Privacy & Security\n",
+        fg="cyan",
+        bold=True,
+    )
+
+    # ── Self-checks ──────────────────────────────────────────────────
+    click.secho("  ┌─ Self Check ─────────────────────────────┐", bold=True)
+    checks_passed = 0
+    checks_total = 5
+
+    def _check(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checks_passed
+        icon = "✓" if ok else "✗"
+        color = "green" if ok else "red"
+        click.secho(f"  {icon} {label}", fg=color)
+        if detail and not ok:
+            click.secho(f"    {detail}", fg="red", dim=True)
+        if ok:
+            checks_passed += 1
+
+    # Python version
+    v = sys.version_info
+    py_ok = v.major >= 3 and v.minor >= 12
+    _check(f"Python {v.major}.{v.minor}.{v.micro}", py_ok, "Need 3.12+")
+
+    # macOS
+    mac_ok = sys.platform == "darwin"
+    mac_ver = platform.mac_ver()[0] if mac_ok else ""
+    _check(f"macOS {mac_ver}".strip(), mac_ok)
+
+    # Docstring import
+    try:
+        from ghosty.catalog import get_cheatsheet_path
+        _check("Catalog module", True)
+    except Exception as e:
+        _check("Catalog module", False, str(e))
+
+    # Catalog load
+    try:
+        from ghosty.catalog import parse_cheatsheet
+        path = get_cheatsheet_path()
+        if path.exists():
+            catalog = parse_cheatsheet(path)
+            _check(f"Catalog ({len(catalog.chapters)} chapters)", True)
+        else:
+            _check("Catalog file", False, f"Not found: {path}")
+    except Exception as e:
+        _check("Catalog load", False, str(e))
+
+    # Config dir
+    config_dir = Path.home() / ".config" / "ghosty"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    _check(f"Config dir ({config_dir})", config_dir.exists())
+
+    click.secho("  └────────────────────────────────────────────┘\n")
+    click.secho(f"   {checks_passed}/{checks_total} checks passed\n", fg="green" if checks_passed == checks_total else "yellow")
+
+    # ── Quick-start tips ─────────────────────────────────────────────
+    click.secho("  ╭──────────────────────────────────────────────╮", bold=True)
+    click.secho("  │" + "  👻  Ghosty is ready!".ljust(44) + "│", fg="magenta")
+    click.secho("  ╰──────────────────────────────────────────────╯\n", bold=True)
+    click.secho("  Top 3 commands to get you started:\n", bold=True)
+
+    tips = [
+        ("ghosty doctor", "Scan your Mac's current security posture in one glance"),
+        ("ghosty harden all", "Preview all 20 chapters of hardening (dry-run by default)"),
+        ("ghosty", "Launch the full keyboard-driven TUI"),
+    ]
+    for i, (cmd, desc) in enumerate(tips, 1):
+        click.secho(f"  {i}. ", nl=False, fg="cyan")
+        click.secho(f"{cmd}", bold=True)
+        click.secho(f"     {desc}\n", dim=True)
+
+    click.secho(f"  {'─' * 46}", fg="magenta")
+    click.secho("  Need help?  ghosty --help\n", dim=True)
+
+
+# ---------------------------------------------------------------------------
 # Doctor — system health check
 # ---------------------------------------------------------------------------
 

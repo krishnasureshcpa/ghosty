@@ -5,7 +5,7 @@
 
 # Ghosty — macOS Privacy & Security TUI
 
-> **v2.0.1 — Consumer-ready release**  
+> **v2.0.2 — Interactive Setup**  
 > Apple-grade privacy hardening, audit, and tool installation — driven from a single keyboard-first terminal app, across 20 chapters of curated hardening guidance.
 
 [![CI](https://github.com/krishnasureshcpa/ghosty/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnasureshcpa/ghosty/actions)
@@ -15,24 +15,29 @@
 [![macOS](https://img.shields.io/badge/macOS-13%2B-black?logo=apple&logoColor=white)](https://www.apple.com/macos)
 [![Stars](https://img.shields.io/github/stars/krishnasureshcpa/ghosty?style=flat&logo=github)](https://github.com/krishnasureshcpa/ghosty)
 
-**Ghosty** (CLI: `ghosty`, alt: `ghost` / `gho`) takes the 919-line **macOS
-Privacy & Security Guide**, transforms it into a typed, reversible action
-catalog, and wraps it in a Textual TUI with sidebar navigation, live
-before/after diffs, parallel execution, dry-run by default, and one-line
-rollback.
+**Ghosty** (CLI: `ghosty`, alt: `ghost` / `gho`) turns the 919-line **macOS
+Privacy & Security Guide** into a typed, reversible action catalog wrapped
+in a Textual TUI — sidebar navigation, live before/after diffs, parallel
+execution, dry-run by default, and one-command rollback.
 
 ```text
-+-- Home -----------------------------+ +-- Catalog -------------------------+
-|                                      | | Firewall                           |
-|   G H O S T Y  .  c l i  .  v2     | | FileVault & firmware              |
-|                                      | | Lockdown Mode                     |
-+--------------------------------------+ | DNS . hosts . pf                 |
-                                          | Homebrew hygiene                 |
-  Ghosty works against:                   | Browser, Tor, VPN                |
-  . 20 chapters of macOS hardening        | Messengers, E2EE                 |
-  . 80+ atomic, reversible actions        | Services, Siri, Spotlight        |
-  . Snapshot -> mutate -> verify -> undo  | Doctor . Snapshot . Replay        |
-                                          +-----------------------------------+
+┌─ Ghosty ───────────────────────────────────────────────────────────┐
+│                                                                    │
+│   👻   G H O S T Y   ●   c l i   v 2                              │
+│        macOS Privacy & Security TUI                                │
+│                                                                    │
+│   ┌─ Catalog ───────────────────────────────────────┐              │
+│   │  Firewall              ● Browser, Tor, VPN      │              │
+│   │  FileVault & firmware  ● Messengers, E2EE       │              │
+│   │  Lockdown Mode         ● Services, Siri,        │              │
+│   │  DNS . hosts . pf        Spotlight              │              │
+│   │  Homebrew hygiene      ● Doctor ● Snapshot      │              │
+│   │                          ● Replay               │              │
+│   └──────────────────────────────────────────────────┘              │
+│                                                                    │
+│   20 chapters · 80+ reversible actions · Snapshot → Verify → Undo  │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -40,14 +45,17 @@ rollback.
 ## Install
 
 ```bash
-# Homebrew (recommended)
+# Interactive setup (recommended) — scans system, installs deps, sets up shell
+python install.py
+
+# Homebrew
 brew install krishnasureshcpa/tap/ghosty
 
 # pipx / uv tool
 uv tool install ghosty-cli
 pipx install ghosty-cli
 
-# git clone
+# git clone + manual
 git clone https://github.com/krishnasureshcpa/ghosty
 cd ghosty
 uv sync
@@ -68,6 +76,7 @@ gh repo clone krishnasureshcpa/ghosty
 ghosty                        Launch the TUI
 ghost                         Same as ghosty (shorter alias)
 gho                           Shortest alias
+ghosty test                   Self-test + welcome screen
 ghosty doctor                 System health dashboard
 ghosty harden all             Non-interactive full hardening
 ghosty harden firewall        Single chapter
