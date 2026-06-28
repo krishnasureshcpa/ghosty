@@ -108,11 +108,23 @@ def check_python() -> tuple[str, bool]:
     ok = v.major >= 3 and v.minor >= 12
     label = f"{v.major}.{v.minor}.{v.micro}"
     print_step("Python", f"{label} {'✓' if ok else '✗ (3.12+ needed)'}", "ok" if ok else "fail")
+    if not ok:
+        print(f"  {DIM}  This script itself is running Python {label}, which is too old.{RESET}")
+        print(f"  {DIM}  We'll install Python 3.12+ and you'll need to re-run.{RESET}")
     return label, ok
 
 
 def check_uv() -> Path | None:
     uv = shutil.which("uv")
+    # Also check common locations the current PATH may not include
+    if not uv:
+        for candidate in [Path.home() / ".local" / "bin" / "uv",
+                          Path("/opt/homebrew/bin/uv"),
+                          Path("/usr/local/bin/uv"),
+                          Path.home() / ".cargo" / "bin" / "uv"]:
+            if candidate.exists():
+                uv = str(candidate)
+                break
     if uv:
         r = run([uv, "--version"], timeout=10)
         print_step("uv", r.stdout.strip() or str(uv), "ok")
@@ -257,15 +269,21 @@ def run_self_test(uv: Path | None, mode: str) -> bool:
     print()
     print(f"  {AMBER}── Running self-test ──────────────────────────────{RESET}")
     if mode == "global" and shutil.which("ghosty"):
-        cmd = ["ghosty", "test"]
+        cmd = [shutil.which("ghosty"), "test"]
     elif (PROJECT_ROOT / ".venv" / "bin" / "ghosty").exists():
         cmd = [str(PROJECT_ROOT / ".venv" / "bin" / "ghosty"), "test"]
     elif uv:
-        cmd = [str(uv), "run", "--directory", str(PROJECT_ROOT), "ghosty", "test"]
+        cmd = [str(uv), "run", "--directory", str(PROJECT_ROOT), "python", "-m", "ghosty", "test"]
     else:
         cmd = [sys.executable, "-m", "ghosty", "test"]
 
+    print(f"  {DIM}Running: {' '.join(cmd)}{RESET}")
+    print()
     r = subprocess.run(cmd, timeout=60, cwd=str(PROJECT_ROOT))
+    if r.returncode == 0:
+        print(f"  {GREEN}✓{RESET} {BOLD}All checks passed!{RESET}")
+    else:
+        print(f"  {RED}✗{RESET} {BOLD}Self-test failed (exit code {r.returncode}){RESET}")
     return r.returncode == 0
 
 
@@ -363,6 +381,23 @@ def main() -> None:
 
     if needs_python and brew:
         install_python_via_homebrew(brew)
+        # Re-check after install
+        _, python_ok = check_python()
+        if not python_ok:
+            py_path = shutil.which("python3.12") or shutil.which("python3")
+            if py_path:
+                print()
+                print(f"  {AMBER}── Python 3.12+ installed, but this session is running an older version ──{RESET}")
+                print(f"  {DIM}  Re-run this script with the new Python:{RESET}")
+                print(f"  {CYAN}    {py_path} install.py{RESET}")
+                print()
+                if ask_yes_no("Re-run with the new Python now?"):
+                    subprocess.run([py_path, __file__])
+                sys.exit(0)
+            else:
+                print()
+                print_step("Python", "3.12+ was installed but not found on PATH. Restart your terminal and re-run install.py", "fail")
+                sys.exit(1)
 
     if needs_uv and brew:
         if not install_uv_via_homebrew(brew):
