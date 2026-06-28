@@ -204,7 +204,7 @@ def doctor(json_output: bool) -> None:
         )
         click.secho(
             f"  Sudo (noask):    {'✓' if checks.get('sudo_nopass') else '✗ (will prompt)'}",
-            fg="green" if checks.get("sudo_nopass") else "amber",
+            fg="green" if checks.get("sudo_nopass") else "yellow",
         )
         click.secho(f"  Terminal color:  {checks['color_capability']}", fg="cyan")
         click.secho("└──────────────────────────────────────────────────┘")
