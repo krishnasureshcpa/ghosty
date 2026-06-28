@@ -7,18 +7,19 @@ global keybindings.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import ClassVar
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.screen import Screen
 from textual.widgets import Footer, Header
 
-from phantom.screens.home import HomeScreen
 from phantom.screens.catalog import CatalogScreen
 from phantom.screens.detail import DetailScreen
-from phantom.screens.run import RunScreen
 from phantom.screens.doctor import DoctorScreen
+from phantom.screens.home import HomeScreen
 from phantom.screens.replay import ReplayScreen
+from phantom.screens.run import RunScreen
 
 
 class PhantomApp(App[None]):
@@ -28,7 +29,7 @@ class PhantomApp(App[None]):
     SUB_TITLE = "macOS Privacy & Security"
     CSS_PATH = None  # inline styles via compose
 
-    SCREENS = {
+    SCREENS: ClassVar[dict[str, type[Screen]]] = {
         "home": HomeScreen,
         "catalog": CatalogScreen,
         "detail": DetailScreen,
@@ -37,7 +38,7 @@ class PhantomApp(App[None]):
         "replay": ReplayScreen,
     }
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         Binding("h", "push_screen('home')", "Home", show=False),
         Binding("c", "push_screen('catalog')", "Catalog", show=True),
         Binding("d", "push_screen('doctor')", "Doctor", show=True),
@@ -56,12 +57,12 @@ class PhantomApp(App[None]):
 
     def action_show_help(self) -> None:
         """Show a help overlay."""
+        from textual.containers import Vertical
         from textual.screen import ModalScreen
-        from textual.widgets import Label, Button, Static
-        from textual.containers import Vertical, Horizontal
+        from textual.widgets import Button, Label, Static
 
         class HelpOverlay(ModalScreen[None]):
-            BINDINGS = [("escape", "dismiss(None)")]
+            BINDINGS: ClassVar[list[tuple[str, str]]] = [("escape", "dismiss(None)")]
 
             def compose(self) -> ComposeResult:
                 with Vertical(classes="help-container"):

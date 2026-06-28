@@ -5,12 +5,11 @@ from pathlib import Path
 from typing import ClassVar
 
 from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, Vertical
-from textual.reactive import reactive
+from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Footer, Label, ListItem, ListView, Static, Tree
+from textual.widgets import Label, ListItem, ListView, Static
 
-from phantom.catalog import Catalog, Action, Chapter, parse_cheatsheet
+from phantom.catalog import Action, Catalog, Chapter, parse_cheatsheet
 
 _CHEAT_SHEET = Path.home() / "MasterBase" / "privacy" / "MacOS-Privacy-CheatSheet.md"
 

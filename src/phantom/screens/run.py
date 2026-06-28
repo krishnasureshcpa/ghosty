@@ -8,10 +8,10 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
 from textual.screen import Screen
-from textual.widgets import Button, Label, ProgressBar, Static
+from textual.widgets import Button, Static
 
 from phantom.catalog import Action
-from phantom.runner import Runner, ExecStatus, RollbackManager
+from phantom.runner import ExecStatus, RollbackManager, Runner
 
 
 class ActionProgress(Static):

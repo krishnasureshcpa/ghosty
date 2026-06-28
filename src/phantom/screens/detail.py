@@ -6,10 +6,10 @@ from typing import ClassVar
 from textual.app import ComposeResult
 from textual.containers import Horizontal, ScrollableContainer, Vertical
 from textual.screen import Screen
-from textual.widgets import Button, Label, Static
+from textual.widgets import Button, Static
 
-from phantom.catalog import Action, parse_cheatsheet
-from phantom.runner import Runner, ExecStatus
+from phantom.catalog import Action
+from phantom.runner import Runner
 
 
 class DetailScreen(Screen[None]):
@@ -42,7 +42,7 @@ class DetailScreen(Screen[None]):
         risk_label = {3: "🔍 Audit", 2: "⚙ Safe", 1: "⚠ Destructive"}
         ops_text = "\n".join(
             f"[bold]  $ {op.command_str()}[/]" +
-            (f" [dim](sudo)[/]" if op.requires_sudo else "")
+            (" [dim](sudo)[/]" if op.requires_sudo else "")
             for op in action.ops
         ) or "  [dim]No commands[/]"
 
@@ -89,7 +89,6 @@ class DetailScreen(Screen[None]):
     def action_dry_run_action(self) -> None:
         if not self.action:
             return
-        from phantom.runner import Runner
         import asyncio
         runner = Runner(max_parallel=1, dry_run=True)
         result = asyncio.run(runner.run_action(self.action))
@@ -107,8 +106,9 @@ class DetailScreen(Screen[None]):
     def action_undo_action(self) -> None:
         if not self.action:
             return
-        from phantom.runner import RollbackManager
         import asyncio
+
+        from phantom.runner import RollbackManager
         rm = RollbackManager()
         results = asyncio.run(rm.rollback_last(1))
         if results:

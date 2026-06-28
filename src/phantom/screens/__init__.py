@@ -1,16 +1,16 @@
 """Phantom TUI screens."""
-from phantom.screens.home import HomeScreen
 from phantom.screens.catalog import CatalogScreen
 from phantom.screens.detail import DetailScreen
-from phantom.screens.run import RunScreen
 from phantom.screens.doctor import DoctorScreen
+from phantom.screens.home import HomeScreen
 from phantom.screens.replay import ReplayScreen
+from phantom.screens.run import RunScreen
 
 __all__ = [
-    "HomeScreen",
     "CatalogScreen",
     "DetailScreen",
-    "RunScreen",
     "DoctorScreen",
+    "HomeScreen",
     "ReplayScreen",
+    "RunScreen",
 ]

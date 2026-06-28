@@ -8,7 +8,7 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
 from textual.screen import Screen
-from textual.widgets import Button, Label, Static
+from textual.widgets import Button, Static
 
 from phantom.theme import detect_capability
 

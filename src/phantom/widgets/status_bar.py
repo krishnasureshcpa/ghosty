@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from textual.app import ComposeResult
-from textual.widgets import Static
 from textual.widget import Widget
+from textual.widgets import Static
 
 
 class StatusBar(Widget):
@@ -31,7 +31,7 @@ class StatusBar(Widget):
         current = st.renderable or ""
         parts = str(current).split("  ")
         if len(parts) >= 3:
-            st.update("  ".join(parts[:2] + [f"[dim]{count} queued[/]"] + parts[3:]))
+            st.update("  ".join([*parts[:2], f"[dim]{count} queued[/]", *parts[3:]]))
 
     def set_timer(self, elapsed: str) -> None:
         st = self.query_one("#status-bar-content", Static)

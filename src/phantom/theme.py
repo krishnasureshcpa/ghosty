@@ -1,5 +1,5 @@
 """
-Phantom theme — true-color–first palette with graceful 16/256-color fallback.
+Phantom theme -- true-color-first palette with graceful 16/256-color fallback.
 
 Design rules (per the project's CLI design quality bar):
     1. NEVER rainbow-vomit — 4 semantic hues only.
@@ -31,7 +31,6 @@ from enum import StrEnum
 from rich.color import Color
 from rich.console import Console
 from rich.theme import Theme as RichTheme
-
 
 # ---------------------------------------------------------------------------
 # Capability detection — single source of truth for color/style behaviour
@@ -100,7 +99,7 @@ class Palette:
     bone: str
 
     @classmethod
-    def for_capability(cls, cap: Capability) -> "Palette":
+    def for_capability(cls, cap: Capability) -> Palette:
         if cap is Capability.TRUECOLOR:
             return cls(
                 capability=cap,
@@ -190,10 +189,9 @@ def make_console(*, force_color: bool = False) -> Console:
 
 __all__ = [
     "Capability",
-    "detect_capability",
     "Palette",
-    "Palette.for_capability",
+    "detect_capability",
+    "make_console",
     "pick_palette",
     "rich_theme",
-    "make_console",
 ]

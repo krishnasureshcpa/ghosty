@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import hashlib
 import re
-from datetime import datetime, timezone
-from enum import IntEnum, Enum
+from datetime import UTC, datetime
+from enum import IntEnum, StrEnum
 from pathlib import Path
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -22,7 +23,7 @@ class RiskLevel(IntEnum):
     DESTRUCTIVE = 1  # needs sudo, may break things (e.g., `pfctl -e`)
 
 
-class ActionType(str, Enum):
+class ActionType(StrEnum):
     """What kind of operation this action performs."""
     READ = "read"           # query current state
     MUTATE = "mutate"       # change system state
@@ -107,7 +108,7 @@ _LEVEL_RE = re.compile(r"^\*\*(\d+)\s*[·•]\s*(.+?)\*\*$", re.MULTILINE)
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _hash_file(path: Path) -> str:
@@ -255,19 +256,17 @@ def _create_quick_start_actions() -> list[Action]:
 def _parse_chapter_body(chapter_num: int, chapter_title: str, body: str) -> list[Action]:
     """Extract actions from a single chapter's markdown body."""
     actions: list[Action] = []
-    action_counter = 0
 
     # Split by risk-level headers (**N · Title**)
     sections = _LEVEL_RE.split(body)
     # sections: [preamble, level, title, content, level, title, content, ...]
 
-    for j in range(1, len(sections), 3):
+    for action_counter, j in enumerate(range(1, len(sections), 3), start=1):
         level = int(sections[j])
         level_title = sections[j + 1].strip()
         content = sections[j + 2] if j + 2 < len(sections) else ""
 
         risk = RiskLevel(level)
-        action_counter += 1
         action_id = f"{_slug(chapter_title)}.{_slug(level_title)}.{action_counter:02d}"
 
         ops = _extract_ops(content)
@@ -389,7 +388,6 @@ def _infer_tags(chapter_title: str, level_title: str) -> list[str]:
         "sharing": "sharing",
         "hardware": "hardware",
         "admin": "accounts",
-        "password": "passwords",
     }
     for keyword, tag in tag_map.items():
         if keyword in text:

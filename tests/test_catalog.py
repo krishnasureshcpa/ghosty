@@ -24,7 +24,7 @@ class TestOp:
 
     def test_command_str(self):
         op = Op(shell="defaults", args=("write", "-g", "NSQuitAlwaysKeepsWindows", "-bool", "false"))
-        assert "defaults write -g NSQuitAlwaysKeepsWindows -bool false" == op.command_str()
+        assert op.command_str() == "defaults write -g NSQuitAlwaysKeepsWindows -bool false"
 
     def test_sudo_flag(self):
         op = Op(shell="pfctl", args=("-e",), requires_sudo=True)

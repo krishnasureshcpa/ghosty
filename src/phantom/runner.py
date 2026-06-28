@@ -8,11 +8,14 @@ from __future__ import annotations
 import asyncio
 import json
 import time
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
+
+from phantom.catalog import Action, ActionType, Op, RiskLevel
 
 if TYPE_CHECKING:
     from phantom.catalog import Action, Op
@@ -151,10 +154,10 @@ class Runner:
                     proc.communicate(),
                     timeout=op.timeout_s,
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError as e:
                 proc.kill()
                 await proc.wait()
-                raise RuntimeError(f"Command timed out after {op.timeout_s}s: {op.command_str()}")
+                raise RuntimeError(f"Command timed out after {op.timeout_s}s: {op.command_str()}") from e
 
             stdout = stdout_bytes.decode() if stdout_bytes else ""
             stderr = stderr_bytes.decode() if stderr_bytes else ""
@@ -209,15 +212,15 @@ class Runner:
 class RollbackManager:
     """Manages rollback operations for executed actions."""
 
-    def __init__(self, store_path: Path = Path("~/.config/phantom/rollback.jsonl").expanduser()):
-        self.store_path = store_path
+    def __init__(self, store_path: Path | None = None):
+        self.store_path = store_path or Path("~/.config/phantom/rollback.jsonl").expanduser()
         self.store_path.parent.mkdir(parents=True, exist_ok=True)
 
     async def record_execution(self, action_id: str, ops_executed: list[Op], rollback_ops: list[Op]) -> None:
         """Record an execution for potential rollback."""
         entry = {
             "action_id": action_id,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "ops_executed": [op.command_str() for op in ops_executed],
             "rollback_ops": [op.command_str() for op in rollback_ops],
         }
@@ -278,13 +281,9 @@ class RollbackManager:
         return entries
 
 
-# Import needed types
-from phantom.catalog import Action, Op, RiskLevel, ActionType
-
-
 __all__ = [
-    "ExecStatus",
     "ExecResult",
-    "Runner",
+    "ExecStatus",
     "RollbackManager",
+    "Runner",
 ]

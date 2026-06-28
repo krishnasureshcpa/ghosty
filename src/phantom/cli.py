@@ -20,14 +20,14 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+from datetime import UTC
 from pathlib import Path
 
 import click
 
 from phantom import __version__
-from phantom.catalog import parse_cheatsheet, RiskLevel
-from phantom.runner import Runner, RollbackManager
-
+from phantom.catalog import parse_cheatsheet
+from phantom.runner import RollbackManager, Runner
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -236,10 +236,10 @@ def snapshot() -> None:
 def snapshot_save(json_output: bool) -> None:
     """Capture current state of key security settings."""
     import subprocess
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     snap: dict = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
     # FileVault
     try:
@@ -260,7 +260,7 @@ def snapshot_save(json_output: bool) -> None:
     # Save
     path = Path.home() / ".config" / "phantom" / "snapshots"
     path.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     snap_file = path / f"snapshot_{ts}.json"
     snap_file.write_text(json.dumps(snap, indent=2))
 

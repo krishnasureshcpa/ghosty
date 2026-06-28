@@ -1,7 +1,6 @@
 """Progress grid — live execution status for multiple actions in parallel."""
 from __future__ import annotations
 
-from textual.app import ComposeResult
 from textual.containers import Grid
 from textual.reactive import reactive
 from textual.widgets import Static

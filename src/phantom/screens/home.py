@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import ClassVar
 
 from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Horizontal, Vertical
 from textual.reactive import reactive
 from textual.screen import Screen
-from textual.widgets import Button, Label, Static
+from textual.widgets import Button, Static
 
 from phantom.catalog import Catalog, parse_cheatsheet
 
