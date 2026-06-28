@@ -14,6 +14,7 @@ from textual.binding import Binding
 from textual.screen import Screen
 from textual.widgets import Footer, Header
 
+from ghosty.catalog import get_cheatsheet_path
 from ghosty.screens.catalog import CatalogScreen
 from ghosty.screens.detail import DetailScreen
 from ghosty.screens.doctor import DoctorScreen
@@ -81,8 +82,5 @@ class GhostyApp(App[None]):
         """Override to keep dark mode always on."""
         self.dark = True
 
-
-# Export theme constants for the app
-from ghosty.catalog import get_cheatsheet_path
 
 DEFAULT_CATALOG_PATH = get_cheatsheet_path()
