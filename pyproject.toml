@@ -8,6 +8,7 @@ license = { text = "MIT" }
 authors = [{ name = "Krishna Suresh CPA", email = "krishnasureshcpa@users.noreply.github.com" }]
 keywords = ["macos", "privacy", "security", "tui", "textual", "rich", "apple-silicon", "hardening"]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console :: Curses",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: MIT License",
@@ -17,6 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Topic :: Security",
     "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
 ]
 
 dependencies = [
@@ -28,8 +30,10 @@ dependencies = [
 
 [project.urls]
 "Homepage"        = "https://github.com/krishnasureshcpa/ghosty"
+"Documentation"   = "https://github.com/krishnasureshcpa/ghosty#readme"
 "Bug Tracker"     = "https://github.com/krishnasureshcpa/ghosty/issues"
 "Source"          = "https://github.com/krishnasureshcpa/ghosty"
+"Changelog"       = "https://github.com/krishnasureshcpa/ghosty/blob/main/CHANGELOG.md"
 "Cheat sheet"     = "https://github.com/drduh/macOS-Security-and-Privacy-Guide"
 
 [build-system]

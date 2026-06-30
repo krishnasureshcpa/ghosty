@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any, ClassVar, Literal
 
 from textual.app import ComposeResult
-from textual.containers import Horizontal, ScrollableContainer, Vertical
+from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Input, Label, ListItem, ListView, Static
 
@@ -50,6 +49,8 @@ class ActionCard(ListItem):
 
 class CatalogScreen(Screen[None]):
     """Browse actions with chapter tabs, search, and inline execution buttons."""
+
+    _dry_task: Any | None = None
 
     CSS = """
     #catalog-root {
@@ -269,18 +270,19 @@ class CatalogScreen(Screen[None]):
         if not action:
             self.notify(f"Unknown action: {action_id}", severity="error")
             return
-        from ghosty.runner import Runner
         import asyncio
+
+        from ghosty.runner import Runner
         async def do_dry() -> None:
             runner = Runner(max_parallel=1, dry_run=True)
-            result = await runner.run_action(action)
+            await runner.run_action(action)
             cmd_str = "\n".join(op.command_str() for op in action.ops[:3])
             self.notify(
                 f"[DRY RUN] {action.title}\n{cmd_str[:200]}",
                 title="Dry Run Complete",
                 timeout=8,
             )
-        asyncio.create_task(do_dry())
+        self._dry_task = asyncio.ensure_future(do_dry())
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Navigate to detail screen on Enter."""

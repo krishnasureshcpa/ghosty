@@ -7,7 +7,7 @@ from typing import ClassVar
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Button, RichLog, Static
+from textual.widgets import Button, Static
 
 from ghosty.catalog import Catalog, get_cheatsheet_path, parse_cheatsheet
 
@@ -101,7 +101,7 @@ class HomeScreen(Screen[None]):
         total_actions = sum(len(ch.actions) for ch in catalog.chapters)
         total_chapters = len(catalog.chapters)
 
-        with Vertical(id="home-root"):
+        with Vertical(id="home-root"):  # noqa: SIM117
             with Vertical(id="home-inner"):
                 # Header
                 with Vertical(id="home-header"):
@@ -119,12 +119,11 @@ class HomeScreen(Screen[None]):
                     yield StatCard("✓", "System", id="stat-health", classes="stat-card accent-health")
 
                 # Quick action buttons
-                with Vertical(id="quick-actions"):
-                    with Horizontal():
-                        yield Button("Browse Catalog", variant="primary", id="btn-catalog")
-                        yield Button("Doctor Check", variant="default", id="btn-doctor")
-                        yield Button("Run All", variant="success", id="btn-run-all")
-                        yield Button("Rollback", variant="error", id="btn-rollback")
+                with Vertical(id="quick-actions"), Horizontal():
+                    yield Button("Browse Catalog", variant="primary", id="btn-catalog")
+                    yield Button("Doctor Check", variant="default", id="btn-doctor")
+                    yield Button("Run All", variant="success", id="btn-run-all")
+                    yield Button("Rollback", variant="error", id="btn-rollback")
 
                 # Footer hint
                 yield Static(

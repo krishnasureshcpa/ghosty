@@ -150,7 +150,7 @@ class DetailScreen(Screen[None]):
         if not self.action:
             return
         runner = Runner(max_parallel=1, dry_run=True)
-        result = await runner.run_action(self.action)
+        await runner.run_action(self.action)
         cmd_str = "\n".join(op.command_str() for op in self.action.ops[:3])
         self.notify(
             f"[DRY RUN] {self.action.title}\n{cmd_str[:200]}",

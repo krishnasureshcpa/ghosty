@@ -34,19 +34,27 @@
 
 ## Install
 
+**Pre-built (recommended)** — no clone needed, one command:
+
 ```bash
-# Interactive setup (recommended)
-python install.py
+uv tool install ghosty-cli          # uv (fastest)
+pipx install ghosty-cli             # pipx
+brew install krishnasureshcpa/tap/ghosty  # Homebrew
+```
 
-# Homebrew
-brew install krishnasureshcpa/tap/ghosty
+**From source** — `ghosty` available globally after install:
 
-# uv/pipx
-uv tool install ghosty-cli
-pipx install ghosty-cli
-
-# Clone
+```bash
 git clone https://github.com/krishnasureshcpa/ghosty
+cd ghosty
+make install                        # one command → ghosty on PATH
+# or: python install.py             # interactive installer
+# or: uv tool install .             # same as make install
+```
+
+**Run from source** (no global install):
+
+```bash
 cd ghosty && uv sync && uv run ghosty
 ```
 

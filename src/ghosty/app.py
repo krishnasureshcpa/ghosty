@@ -4,13 +4,12 @@ GhostyApp — the Textual application root with full-screen CSS theme.
 
 from __future__ import annotations
 
-from typing import ClassVar
+from collections.abc import Mapping
+from typing import Any, ClassVar
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.screen import Screen
-from typing import Any
-from collections.abc import Mapping
 from textual.widgets import Footer
 
 from ghosty.screens.catalog import CatalogScreen

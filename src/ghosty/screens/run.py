@@ -11,7 +11,7 @@ from textual.screen import Screen
 from textual.widgets import Button, Static
 
 from ghosty.catalog import Action
-from ghosty.runner import ExecResult, ExecStatus, RollbackManager, Runner
+from ghosty.runner import ExecStatus, RollbackManager, Runner
 
 
 class ActionCell(Static):
