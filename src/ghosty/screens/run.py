@@ -14,17 +14,17 @@ from ghosty.catalog import Action
 from ghosty.runner import ExecResult, ExecStatus, RollbackManager, Runner
 
 
-class ActionProgress(Static):
-    """A single action's progress cell in the grid."""
+class ActionCell(Static):
+    """A single action's progress cell with rich visual status."""
 
     action_id: reactive[str] = reactive("")
     status: reactive[str] = reactive("pending")
     elapsed: reactive[str] = reactive("--")
 
-    def __init__(self, action_id: str = "", status: str = "pending", **kwargs: Any) -> None:
+    def __init__(self, action_id: str = "", title: str = "", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.action_id = action_id
-        self.status = status
+        self._title = title
 
     def render(self) -> str:
         icons = {
@@ -33,54 +33,99 @@ class ActionProgress(Static):
             "completed": "✓",
             "failed": "✗",
             "skipped": "⊘",
-            "dry_run": "🔍",
+            "dry_run": "◇",
         }
         icon = icons.get(self.status, "•")
         color = {
             "pending": "dim",
-            "running": "cyan",
-            "completed": "green",
-            "failed": "red",
+            "running": "bold #22D3EE",
+            "completed": "bold #34D399",
+            "failed": "bold #EF4444",
             "skipped": "dim",
-            "dry_run": "yellow",
+            "dry_run": "bold #F59E0B",
         }.get(self.status, "dim")
-        return f"[{color}]{icon} [bold]{self.action_id}[/]  {self.elapsed}[/]"
+        return f"[{color}]{icon}  {self._title}[/]  [#888BAA]{self.elapsed}[/]"
 
 
 class RunScreen(Screen[None]):
     """Execute actions with a live parallel progress grid."""
 
+    CSS = """
+    #run-root {
+        height: 100%;
+        padding: 1;
+    }
+    #run-header {
+        padding: 0 0 1 0;
+        border-bottom: solid #3D3F5C;
+        margin: 0 0 1 0;
+    }
+    #run-title {
+        text-style: bold;
+        color: #7C5CFF;
+    }
+    #run-status {
+        color: #888BAA;
+        padding: 0 0 0 0;
+    }
+    #progress-grid {
+        height: 1fr;
+        padding: 0 0 0 0;
+    }
+    ActionCell {
+        padding: 0 1;
+        height: 3;
+        border-bottom: solid #2D2F4E;
+    }
+    ActionCell:last-of-type {
+        border-bottom: none;
+    }
+    #run-footer {
+        padding: 1 0 0 0;
+        border-top: solid #3D3F5C;
+    }
+    #run-summary {
+        color: #BEC1D6;
+        margin: 0 0 1 0;
+        text-align: center;
+    }
+    """
+
     BINDINGS: ClassVar = [
         ("escape", "go_back", "Back"),
-        ("space", "toggle_pause", "Pause/Resume"),
     ]
 
     def compose(self) -> ComposeResult:
         with Vertical(id="run-root"):
-            yield Static("[bold]Execution Dashboard[/]", id="run-title", classes="title")
-            yield Static("Ready to execute", id="run-status", classes="status-line")
+            with Horizontal(id="run-header"):
+                yield Static("[bold #7C5CFF]▶  Execution Dashboard[/]", id="run-title")
+            yield Static("Ready", id="run-status")
 
-            with Vertical(id="progress-grid", classes="grid"):
-                yield Static("[dim]No actions loaded — launch from Catalog[/]")
+            with Vertical(id="progress-grid"):
+                yield Static("[dim]No actions loaded[/]")
 
-            with Horizontal(id="run-footer", classes="button-row"):
-                yield Button("▶ Start", variant="primary", id="btn-start")
-                yield Button("⏸ Pause", variant="default", id="btn-pause", disabled=True)
-                yield Button("⬅ Back", variant="default", id="btn-back")
+            yield Static("", id="run-summary")
+
+            with Horizontal(id="run-footer"):
+                yield Button("▶  Start", variant="primary", id="btn-start")
+                yield Button("←  Back", variant="default", id="btn-back")
 
     def run_actions(self, actions: list[Action]) -> None:
-        """Load and execute a list of actions."""
+        """Load actions for execution."""
         grid = self.query_one("#progress-grid", Vertical)
         grid.remove_children()
-        self._cells: dict[str, ActionProgress] = {}
+        self._cells: dict[str, ActionCell] = {}
         self._actions = actions
 
         for action in actions:
-            cell = ActionProgress(action_id=action.id, status="pending")
+            cell = ActionCell(action_id=action.id, title=action.title, status="pending")
             self._cells[action.id] = cell
             grid.mount(cell)
 
-        self._update_status(f"Loaded {len(actions)} actions — press Start to execute")
+        self.query_one("#run-status", Static).update(
+            f"[#888BAA]Loaded {len(actions)} action{'s' if len(actions) > 1 else ''} — press [bold]Start[/] to execute[/]"
+        )
+        self.query_one("#run-summary", Static).update("")
 
     def _update_status(self, text: str) -> None:
         self.query_one("#run-status", Static).update(text)
@@ -89,8 +134,6 @@ class RunScreen(Screen[None]):
         btn_id = event.button.id
         if btn_id == "btn-start":
             await self.action_start()
-        elif btn_id == "btn-pause":
-            self.notify("Pause/resume coming soon")
         elif btn_id == "btn-back":
             self.action_go_back()
 
@@ -99,10 +142,8 @@ class RunScreen(Screen[None]):
             self.notify("No actions to run", severity="warning")
             return
 
-        # Disable start, enable pause
         self.query_one("#btn-start", Button).disabled = True
-        self.query_one("#btn-pause", Button).disabled = False
-        self._update_status("Running…")
+        self._update_status("[#22D3EE]Running…[/]")
 
         def on_progress(action_id: str, status: ExecStatus) -> None:
             if action_id in self._cells:
@@ -116,19 +157,19 @@ class RunScreen(Screen[None]):
 
         completed = sum(1 for r in results.values() if r.status == ExecStatus.COMPLETED)
         failed = sum(1 for r in results.values() if r.status == ExecStatus.FAILED)
-        self._update_status(f"Done — {completed} succeeded, {failed} failed")
+        total = len(results)
 
+        summary = f"[#BEC1D6]Done — [bold #34D399]{completed} succeeded[/]"
+        if failed:
+            summary += f", [bold #EF4444]{failed} failed[/]"
+        summary += f"[/] of {total} total"
+
+        self._update_status(summary)
+        self.query_one("#run-summary", Static).update(summary)
         self.query_one("#btn-start", Button).disabled = False
-        self.query_one("#btn-pause", Button).disabled = True
 
-        # Record rollbacks
         rm = RollbackManager()
-        await self._record_rollbacks(rm, self._actions, results)
-
-    async def _record_rollbacks(
-        self, rm: RollbackManager, actions: list[Action], results: dict[str, ExecResult]
-    ) -> None:
-        for action in actions:
+        for action in self._actions:
             res = results.get(action.id)
             if res and res.status == ExecStatus.COMPLETED:
                 await rm.record_execution(action.id, action.ops, action.rollback_ops)

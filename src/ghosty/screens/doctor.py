@@ -1,4 +1,4 @@
-"""Doctor screen — system health check with live results."""
+"""Doctor screen — system health check with live-streaming results."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from ghosty.theme import detect_capability
 
 
 class CheckRow(Static):
-    """A single health check row."""
+    """A single health check row with animated status."""
 
     label: reactive[str] = reactive("")
     status: reactive[str] = reactive("pending")
@@ -28,31 +28,75 @@ class CheckRow(Static):
         self.status = status
 
     def render(self) -> str:
-        icons = {"pending": "⏳", "pass": "✓", "fail": "✗", "warn": "⚠"}
-        icon = icons.get(self.status, "?")
-        color = {"pending": "dim", "pass": "green", "fail": "red", "warn": "yellow"}.get(
-            self.status, "dim"
-        )
-        detail_str = f"  [dim]{self.detail}[/]" if self.detail else ""
-        return f"  [{color}]{icon}  {self.label}{detail_str}[/]"
+        icons = {"pending": "  ⏳", "running": "  ▶", "pass": "  ✓", "fail": "  ✗", "warn": "  ⚠"}
+        icon = icons.get(self.status, "  ?")
+        color = {
+            "pending": "dim",
+            "running": "bold #22D3EE",
+            "pass": "bold #34D399",
+            "fail": "bold #EF4444",
+            "warn": "bold #F59E0B",
+        }.get(self.status, "dim")
+        detail_str = f"  [#888BAA]{self.detail}[/]" if self.detail else ""
+        return f"[{color}]{icon}  {self.label}{detail_str}[/]"
 
 
 class DoctorScreen(Screen[None]):
-    """System health dashboard."""
+    """System health dashboard with live check results."""
+
+    CSS = """
+    #doctor-root {
+        height: 100%;
+        padding: 1;
+    }
+    #doctor-header {
+        padding: 0 0 1 0;
+        border-bottom: solid #3D3F5C;
+        margin: 0 0 1 0;
+    }
+    #doctor-title {
+        text-style: bold;
+        color: #7C5CFF;
+    }
+    #doctor-status {
+        color: #888BAA;
+        padding: 0 0 0 0;
+    }
+    #checks-grid {
+        height: 1fr;
+        padding: 0 0 0 0;
+    }
+    CheckRow {
+        padding: 0 1;
+        height: 3;
+        border-bottom: solid #2D2F4E;
+    }
+    CheckRow:last-of-type {
+        border-bottom: none;
+    }
+    #doctor-footer {
+        padding: 1 0 0 0;
+        border-top: solid #3D3F5C;
+    }
+    #doctor-summary {
+        color: #BEC1D6;
+        margin: 0 0 1 0;
+        text-align: center;
+    }
+    """
 
     BINDINGS: ClassVar = [
         ("escape", "go_back", "Back"),
-        ("r", "refresh", "Refresh"),
+        ("r", "run_checks", "Refresh"),
     ]
 
     def compose(self) -> ComposeResult:
         with Vertical(id="doctor-root"):
-            yield Static("[bold #22D3EE]🩺  Ghosty Doctor[/]", id="doctor-title", classes="title")
-            yield Static(
-                "Press [bold]r[/] to run checks", id="doctor-status", classes="status-line"
-            )
+            with Horizontal(id="doctor-header"):
+                yield Static("[bold #7C5CFF]🩺  Doctor[/]", id="doctor-title")
+            yield Static("Press [bold]r[/] or [bold]Run Checks[/] to start", id="doctor-status")
 
-            with Vertical(id="checks-grid", classes="grid"):
+            with Vertical(id="checks-grid"):
                 for check_id in ("arch", "sip", "filevault", "firewall", "brew", "sudo", "color"):
                     yield CheckRow(
                         id=f"check-{check_id}",
@@ -60,23 +104,24 @@ class DoctorScreen(Screen[None]):
                         status="pending",
                     )
 
-            with Horizontal(id="doctor-footer", classes="button-row"):
-                yield Button("▶ Run Checks", variant="primary", id="btn-run")
-                yield Button("⬅ Back", variant="default", id="btn-back")
+            yield Static("", id="doctor-summary")
+
+            with Horizontal(id="doctor-footer"):
+                yield Button("▶  Run Checks", variant="primary", id="btn-run")
+                yield Button("←  Back", variant="default", id="btn-back")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-run":
-            self.action_refresh()
+            self.run_checks()
         elif event.button.id == "btn-back":
             self.action_go_back()
 
-    def action_refresh(self) -> None:
-        """Run all health checks."""
-        self.query_one("#doctor-status", Static).update("Running checks…")
+    def run_checks(self) -> None:
+        """Run all health checks with async streaming."""
+        self.query_one("#doctor-status", Static).update("[#22D3EE]Running checks…[/]")
         self.query_one("#btn-run", Button).disabled = True
-        self._run_checks()
+        self.query_one("#doctor-summary", Static).update("")
 
-    def _run_checks(self) -> None:
         import platform
 
         checks: dict[str, Callable[[], tuple[str, str]]] = {
@@ -93,16 +138,40 @@ class DoctorScreen(Screen[None]):
             "color": lambda: ("pass", detect_capability().value),
         }
 
+        pass_count = 0
+        warn_count = 0
+        fail_count = 0
+
         for check_id, fn in checks.items():
+            row = self.query_one(f"#check-{check_id}", CheckRow)
+            row.status = "running"
             try:
                 status, detail = fn()
             except Exception as e:
                 status, detail = "fail", str(e)
-            row = self.query_one(f"#check-{check_id}", CheckRow)
             row.status = status
             row.detail = detail
+            if status == "pass":
+                pass_count += 1
+            elif status == "warn":
+                warn_count += 1
+            elif status == "fail":
+                fail_count += 1
 
-        self.query_one("#doctor-status", Static).update("All checks complete")
+        total = len(checks)
+        summary_parts = []
+        if pass_count:
+            summary_parts.append(f"[bold #34D399]{pass_count} passed[/]")
+        if warn_count:
+            summary_parts.append(f"[bold #F59E0B]{warn_count} warnings[/]")
+        if fail_count:
+            summary_parts.append(f"[bold #EF4444]{fail_count} failed[/]")
+
+        summary_text = f"[#BEC1D6]—  {'  '.join(summary_parts)}  —  of {total} checks[/]"
+        self.query_one("#doctor-summary", Static).update(summary_text)
+        self.query_one("#doctor-status", Static).update(
+            f"[#34D399]✓ Complete[/]  {summary_text}"
+        )
         self.query_one("#btn-run", Button).disabled = False
 
     @staticmethod
@@ -132,7 +201,6 @@ class DoctorScreen(Screen[None]):
     @staticmethod
     def _check_brew() -> tuple[str, str]:
         from pathlib import Path
-
         brew = Path("/opt/homebrew/bin/brew")
         return ("pass", str(brew)) if brew.exists() else ("fail", "not found")
 

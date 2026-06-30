@@ -1,35 +1,94 @@
-"""Home / dashboard screen — gradient banner, stats, quick actions."""
+"""Home / dashboard screen — stats cards + quick action buttons."""
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.reactive import reactive
 from textual.screen import Screen
-from textual.widgets import Button, Static
+from textual.widgets import Button, RichLog, Static
 
 from ghosty.catalog import Catalog, get_cheatsheet_path, parse_cheatsheet
 
 
 class StatCard(Static):
-    """A single stat tile: number + label."""
+    """A bordered stat tile with a value and label."""
 
-    value: reactive[str] = reactive("--")
-    label: reactive[str] = reactive("")
-
-    def __init__(self, value: str = "--", label: str = "", **kwargs: Any) -> None:
+    def __init__(self, value: str, label: str, accent: str = "#7C5CFF", **kwargs) -> None:  # type: ignore[no-untyped-def]
+        self._value = value
+        self._label = label
+        self._accent = accent
         super().__init__(**kwargs)
-        self.value = value
-        self.label = label
 
     def render(self) -> str:
-        return f"\n[bold]{self.value}[/]\n[dim]{self.label}[/]"
+        return (
+            f"\n"
+            f"[bold #FFFFFF]{self._value}[/]\n"
+            f"[#888BAA]{self._label}[/]"
+        )
 
 
 class HomeScreen(Screen[None]):
-    """Landing screen with overview stats and quick-start buttons."""
+    """Landing dashboard with overview stats and quick-start buttons."""
+
+    CSS = """
+    #home-root {
+        align: center middle;
+        width: 100%;
+        height: 100%;
+    }
+    #home-inner {
+        width: 70;
+        height: auto;
+        align: center middle;
+    }
+    #home-header {
+        padding: 0 0 1 0;
+        text-align: center;
+    }
+    #home-header Static {
+        text-align: center;
+    }
+    #stats-row {
+        margin: 0 0 1 0;
+    }
+    .stat-card {
+        width: 1fr;
+        height: 5;
+        border: solid #3D3F5C;
+        background: #232541;
+        text-align: center;
+        margin: 0 1 0 0;
+    }
+    .stat-card:last-of-type {
+        margin-right: 0;
+    }
+    .stat-card.accent-chapters { border-left: solid #7C5CFF; }
+    .stat-card.accent-actions { border-left: solid #22D3EE; }
+    .stat-card.accent-run { border-left: solid #34D399; }
+    .stat-card.accent-health { border-left: solid #F59E0B; }
+
+    #quick-actions {
+        margin: 1 0 1 0;
+        width: 100%;
+    }
+    #quick-actions Horizontal {
+        align: center middle;
+    }
+    Button {
+        min-width: 16;
+        margin: 0 1 0 0;
+    }
+    Button:last-of-type {
+        margin-right: 0;
+    }
+    #footer-hint {
+        text-align: center;
+        color: #6B6E8A;
+        width: 100%;
+    }
+    """
 
     BINDINGS: ClassVar = [
         ("c", "push_screen('catalog')", "Catalog"),
@@ -43,33 +102,35 @@ class HomeScreen(Screen[None]):
         total_chapters = len(catalog.chapters)
 
         with Vertical(id="home-root"):
-            # Banner
-            yield Static(
-                "[bold #7C5CFF]▚▚  P H A N T O M  ▚▚[/]\n"
-                "[#22D3EE]macOS Privacy & Security[/]\n"
-                f"[dim]v2 · {total_actions} actions across {total_chapters} chapters[/]",
-                id="banner",
-            )
-            # Stats row
-            with Horizontal(id="stats-row", classes="grid"):
-                yield StatCard(str(total_chapters), "Chapters", id="stat-chapters")
-                yield StatCard(str(total_actions), "Actions", id="stat-actions")
-                yield StatCard("--", "Last Run", id="stat-last-run")
+            with Vertical(id="home-inner"):
+                # Header
+                with Vertical(id="home-header"):
+                    yield Static("[bold #7C5CFF]GHOSTY[/]", id="brand")
+                    yield Static("[#22D3EE]macOS Privacy & Security[/]")
+                    yield Static(
+                        f"[#888BAA]v2  ·  {total_actions} actions  ·  {total_chapters} chapters[/]",
+                    )
 
-            # Quick actions
-            with Vertical(id="quick-actions"):
-                yield Static("[bold]Quick Actions[/]", classes="section-title")
-                with Horizontal(classes="button-row"):
-                    yield Button("📋 Browse Catalog", variant="primary", id="btn-catalog")
-                    yield Button("🩺 Doctor Check", variant="default", id="btn-doctor")
-                    yield Button("▶ Run All", variant="default", id="btn-run-all")
-                    yield Button("↺ Rollback", variant="error", id="btn-rollback")
+                # Stat cards
+                with Horizontal(id="stats-row"):
+                    yield StatCard(str(total_chapters), "Chapters", id="stat-chapters", classes="stat-card accent-chapters")
+                    yield StatCard(str(total_actions), "Actions", id="stat-actions", classes="stat-card accent-actions")
+                    yield StatCard("--", "Last Run", id="stat-last-run", classes="stat-card accent-run")
+                    yield StatCard("✓", "System", id="stat-health", classes="stat-card accent-health")
 
-            # Footer hint
-            yield Static(
-                "[dim]Press [bold]c[/] catalog · [bold]d[/] doctor · [bold]r[/] history · [bold]q[/] quit[/]",
-                id="hint",
-            )
+                # Quick action buttons
+                with Vertical(id="quick-actions"):
+                    with Horizontal():
+                        yield Button("Browse Catalog", variant="primary", id="btn-catalog")
+                        yield Button("Doctor Check", variant="default", id="btn-doctor")
+                        yield Button("Run All", variant="success", id="btn-run-all")
+                        yield Button("Rollback", variant="error", id="btn-rollback")
+
+                # Footer hint
+                yield Static(
+                    "[dim]c  Catalog  ·  d  Doctor  ·  r  History  ·  q  Quit  ·  ?  Help[/]",
+                    id="footer-hint",
+                )
 
     def _load_catalog(self) -> Catalog:
         try:
