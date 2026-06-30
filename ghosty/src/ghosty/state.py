@@ -6,15 +6,15 @@ Immutable-at-rest: every mutation produces a new instance.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from enum import Enum
+from dataclasses import dataclass, field, fields
+from enum import StrEnum
 from typing import Any
 
 from ghosty.catalog import Action, Catalog, Chapter
 from ghosty.telemetry import log_event
 
 
-class AppMode(str, Enum):
+class AppMode(StrEnum):
     """Top-level mode the application is in."""
 
     HOME = "home"
@@ -66,4 +66,4 @@ def evolve(state: AppState, **changes: Any) -> AppState:
     mutated = {k: v for k, v in changes.items() if getattr(state, k, object()) != v}
     if mutated:
         log_event(f"AppState evolve: {mutated}")
-    return AppState(**{**{f.name: getattr(state, f.name) for f in field(AppState)}, **changes})
+    return AppState(**{**{f.name: getattr(state, f.name) for f in fields(AppState)}, **changes})

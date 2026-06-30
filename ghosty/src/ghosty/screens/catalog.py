@@ -10,7 +10,7 @@ from textual.screen import Screen
 from textual.widgets import Label, ListItem, ListView, Static
 
 from ghosty.catalog import Action, Catalog, Chapter, get_cheatsheet_path, parse_cheatsheet
-from ghosty.state import AppMode, evolve
+from ghosty.state import evolve
 
 
 class ActionListItem(ListItem):

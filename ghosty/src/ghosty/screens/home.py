@@ -45,7 +45,7 @@ class HomeScreen(Screen[None]):
         with Vertical(id="home-root"):
             # Banner
             yield Static(
-                "[bold #7C5CFF]▚▚  P H A N T O M  ▚▚[/]\n"
+                "[bold #7C5CFF]▚▚  G H O S T Y  ▚▚[/]\n"
                 "[#22D3EE]macOS Privacy & Security[/]\n"
                 f"[dim]v2 · {total_actions} actions across {total_chapters} chapters[/]",
                 id="banner",

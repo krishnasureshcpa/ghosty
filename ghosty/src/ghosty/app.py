@@ -21,7 +21,7 @@ from ghosty.screens.doctor import DoctorScreen
 from ghosty.screens.home import HomeScreen
 from ghosty.screens.replay import ReplayScreen
 from ghosty.screens.run import RunScreen
-from ghosty.state import AppState, AppMode, evolve
+from ghosty.state import AppMode, AppState, evolve
 from ghosty.telemetry import log_event, log_exception, setup_telemetry
 
 _CSS = """
@@ -147,13 +147,13 @@ class GhostyApp(App[None]):
         self.state = evolve(self.state, mode=AppMode.HOME)
         self.push_screen("home")
 
-    def _handle_exception(self, error: BaseException) -> bool:
+    def _handle_exception(self, error: Exception) -> None:
         """Graceful panic: log to telemetry, restore terminal, don't crash silently.
 
         (14-step loop requirement #9)
         """
         log_exception(error, context="GhostyApp._handle_exception")
-        return super()._handle_exception(error)
+        super()._handle_exception(error)
 
     def action_show_help(self) -> None:
         """Show a help overlay."""

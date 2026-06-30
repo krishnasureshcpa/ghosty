@@ -11,7 +11,6 @@ from textual.widgets import Static
 
 from ghosty.runner import ExecStatus
 
-
 _SPINNER_CHARS = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 
 

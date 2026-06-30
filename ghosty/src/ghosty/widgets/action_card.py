@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.widgets import Button, Label, Static
+from textual.widgets import Label, Static
 
 from ghosty.catalog import Action
 
@@ -18,8 +18,8 @@ class ActionCard(Vertical):
         self._action = action
         super().__init__(**kwargs)
 
-    RISK_STYLES = {3: "#22D3EE", 2: "#FFC857", 1: "#FF5C7C"}
-    RISK_LABELS = {3: "audit", 2: "safe", 1: "destructive"}
+    RISK_STYLES: ClassVar[dict[int, str]] = {3: "#22D3EE", 2: "#FFC857", 1: "#FF5C7C"}
+    RISK_LABELS: ClassVar[dict[int, str]] = {3: "audit", 2: "safe", 1: "destructive"}
 
     def compose(self) -> ComposeResult:
         risk_color = self.RISK_STYLES.get(self._action.risk.value, "#94A3B8")

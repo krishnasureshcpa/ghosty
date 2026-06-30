@@ -8,12 +8,14 @@ enforcing a clear data-flow boundary.
 
 from __future__ import annotations
 
-from enum import Enum, auto
+from dataclasses import dataclass
+from enum import StrEnum, auto
+from typing import Any
 
 from ghosty.catalog import Action, Chapter
 
 
-class MsgX(str, Enum):
+class MsgX(StrEnum):
     """All application-level messages, defined as an enum.
 
     Every screen action, navigation event, and side effect is captured
