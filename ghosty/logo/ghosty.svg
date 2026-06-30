@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs>
+    <!-- Ethereal body gradient — ghost white with subtle violet shift -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="40%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="60%"  stop-color="#F0EEFF" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#E0DAFF" stop-opacity="0.60"/>
+    </linearGradient>
+
+    <!-- Outer violet glow (makes the ghost pop against dark bg) -->
+    <radialGradient id="outerGlow" cx="50%" cy="45%" r="55%">
+      <stop offset="0%"   stop-color="#8B5CF6" stop-opacity="0.15"/>
+      <stop offset="60%"  stop-color="#8B5CF6" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Neon glow for eyes -->
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Soft body shadow for depth -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#8B5CF6" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Outer ambient glow -->
+  <rect width="200" height="240" fill="url(#outerGlow)"/>
+
+  <!-- Ghost body — classic dome + wavy sheet bottom -->
+  <g filter="url(#shadow)">
+    <path d="
+      M 100 18
+      C 45 18, 20 55, 20 95
+      L 20 168
+      Q 28 178 36 168
+      Q 44 158 52 168
+      Q 60 178 68 168
+      Q 76 158 84 168
+      Q 92 178 100 168
+      Q 108 158 116 168
+      Q 124 178 132 168
+      Q 140 158 148 168
+      Q 156 178 164 168
+      Q 172 158 180 168
+      L 180 95
+      C 180 55, 155 18, 100 18 Z
+    " fill="url(#bodyGrad)"/>
+
+    <!-- Ghost cheek highlight (left) -->
+    <ellipse cx="55" cy="105" rx="16" ry="20" fill="#FFFFFF" opacity="0.5"/>
+    <!-- Ghost cheek highlight (right) -->
+    <ellipse cx="145" cy="105" rx="16" ry="20" fill="#FFFFFF" opacity="0.5"/>
+  </g>
+
+  <!-- Left eye socket — rounded cutout -->
+  <ellipse cx="70" cy="82" rx="14" ry="18" fill="#0D1117" opacity="0.85"/>
+  <ellipse cx="70" cy="82" rx="10" ry="14" fill="#0D1117"/>
+
+  <!-- Left eye glyph — terminal angle bracket -->
+  <text x="61" y="91" fill="#8B5CF6" font-family="'SF Mono','JetBrains Mono','Cascadia Code',monospace"
+        font-size="20" font-weight="700" filter="url(#neon)">&gt;</text>
+
+  <!-- Right eye socket — rounded cutout -->
+  <ellipse cx="130" cy="82" rx="14" ry="18" fill="#0D1117" opacity="0.85"/>
+  <ellipse cx="130" cy="82" rx="10" ry="14" fill="#0D1117"/>
+
+  <!-- Right eye glyph — terminal angle bracket -->
+  <text x="121" y="91" fill="#8B5CF6" font-family="'SF Mono','JetBrains Mono','Cascadia Code',monospace"
+        font-size="20" font-weight="700" filter="url(#neon)">&lt;</text>
+
+  <!-- Subtle code line decoration -->
+  <text x="76" y="138" fill="#8B5CF6" font-family="'SF Mono','JetBrains Mono',monospace"
+        font-size="7" opacity="0.3" letter-spacing="1.5">_ ~ $</text>
+</svg>
