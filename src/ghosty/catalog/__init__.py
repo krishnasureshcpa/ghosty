@@ -46,6 +46,7 @@ class Op(BaseModel):
     requires_sudo: bool = False
     description: str = ""
     idempotent: bool = True
+    rollback: "Op | None" = None
 
     def command_str(self) -> str:
         return " ".join([self.shell, *self.args])
@@ -409,10 +410,16 @@ def _infer_type(ops: list[Op]) -> ActionType:
 
 
 def _infer_rollback(ops: list[Op]) -> list[Op]:
-    """Best-effort inverse for common macOS commands."""
+    """Best-effort inverse for common macOS commands.
+
+    Prefers backend-provided rollback (op.rollback) over pattern matching.
+    """
     rollback: list[Op] = []
     for op in ops:
-        if op.shell == "defaults" and "write" in op.args:
+        # Backend-provided rollback takes priority
+        if op.rollback is not None:
+            rollback.append(op.rollback)
+        elif op.shell == "defaults" and "write" in op.args:
             try:
                 idx = op.args.index("write")
                 domain = op.args[idx + 1]
